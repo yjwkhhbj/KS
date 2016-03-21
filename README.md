@@ -1,12 +1,10 @@
 KS
-===
+---
 玩转私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
 
-示例
----
-运行com.liuzy.test.Test类的main方法看效果
+### 运行com.liuzy.test.Test类的main方法看效果
 
-### 输入me的私钥和pkcs8私钥
+### 输出me的私钥和pkcs8私钥
 ```java
 KeyUtils.write2RsaKey(privateKey, testDir + "rsa_private.key");
 KeyUtils.write2PKCS8Key(privateKey, testDir + "pkcs8_private.key");
