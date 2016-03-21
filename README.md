@@ -1,17 +1,17 @@
 KS
 ===
-玩转私钥、公钥、证书、签发、CA、对象转文件、文件转对象。 
+玩转私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
 
-前言
+示例
 ---
-费话不多说，直接看Test类，一清二楚
+运行com.liuzy.test.Test类的main方法看效果
 
-### testKeyUtils()
+### 输入me的私钥和pkcs8私钥
 ```java
 KeyUtils.write2RsaKey(privateKey, testDir + "rsa_private.key");
 KeyUtils.write2PKCS8Key(privateKey, testDir + "pkcs8_private.key");
 ```
-### testCerUtils()
+### 生成me的证书请求文件
 ```java
 // 使用者的信息
 String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
@@ -21,16 +21,21 @@ CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN)
 CertReqUtils.write(csr, testDir + "me.csr");
 ```
 
-### testCACenter1()
+### 初始化证书中心，输CA私钥和CA自签证书，并使用me的公钥和me的信息给他签发证书
 ```java
 // CA初始化1
 CACenter caCenter = new CACenter();
 caCenter.init();
 CertUtils.write(caCenter.getCacert(), testDir + "ca.crt");
 KeyUtils.write2RsaKey(caCenter.getPrivateKey(), testDir + "ca.pem");
+
+// 签发1 根据公钥和使用者信息
+String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
+Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
+CertUtils.write(newcert1, testDir + "newcert1.cer");
 ```
 
-### testCACenter2()
+### 用CA私钥和CA自签证书初始化证书中心，并用me的证书请求给他签发证书
 ```java
 // CA初始化2
 CACenter caCenter = new CACenter();
@@ -42,7 +47,7 @@ Certificate newcert2 = caCenter.sign(csr);
 CertUtils.write(newcert2, testDir + "newcert2.cer");
 ```
 
-### testCertUtils()
+### 读证书，打印证书信息
 ```java
 // 读证书
 Certificate cert = CertUtils.read(testDir + "newcert1.cer");
@@ -51,3 +56,9 @@ CertUtils.print((X509Certificate) cert);
 // 验证证书
 System.out.println(CertUtils.verify(cert));
 ```
+
+图形化界面
+---
+后面将实现图形化界面
+
+### 运行com.liuzy.ui.Main类的main方法
