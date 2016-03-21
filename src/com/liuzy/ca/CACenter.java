@@ -1,16 +1,23 @@
 package com.liuzy.ca;
 
 import java.math.BigInteger;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.spec.KeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.pkcs.CertificationRequest;
+import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 import com.liuzy.utils.CertUtils;
@@ -131,8 +138,15 @@ public class CACenter {
 	 * @param csr
 	 * @return
 	 */
-	public Certificate sign(Certificate csr) {
-		return null;
+	public Certificate sign(CertificationRequest csr) throws Exception {
+		CertificationRequestInfo csrinfo = csr.getCertificationRequestInfo();
+		X509Name x509Name = csrinfo.getSubject();
+		String subjectDN = x509Name.toString();
+		SubjectPublicKeyInfo info = csrinfo.getSubjectPublicKeyInfo();
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		KeySpec keySpec = new X509EncodedKeySpec(info.getEncoded());
+		PublicKey mPublicKey = kf.generatePublic(keySpec);
+		return sign(mPublicKey, subjectDN);
 	}
 
 	public Certificate getCacert() {

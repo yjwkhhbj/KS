@@ -129,7 +129,7 @@ public class KeyUtils {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(new File(path));
-			fw.write(toPKCS8KeyString(pk));
+			fw.write(toPKCS8KeyStr(pk));
 			fw.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -151,7 +151,7 @@ public class KeyUtils {
 	 * -----END PRIVATE KEY-----</pre>
 	 * @param pk
 	 */
-	public static String toPKCS8KeyString(PrivateKey pk) {
+	public static String toPKCS8KeyStr(PrivateKey pk) {
 		StringWriter sw = null;
 		PemWriter pw = null;
 		try {

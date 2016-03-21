@@ -18,7 +18,7 @@ import org.bouncycastle.openssl.PEMReader;
 import com.liuzy.util.Util;
 
 /**
- * 生成KeyStore和TrustStore
+ * 双向认证时，生成KeyStore和TrustStore的工具
  *
  * @author liuzy
  */

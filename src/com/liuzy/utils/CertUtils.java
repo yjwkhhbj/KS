@@ -1,90 +1,31 @@
 package com.liuzy.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.io.StringWriter;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestHolder;
-
-import com.liuzy.util.Base64;
 
 /**
- * 
+ * 证书
  * @author liuzy
  * @version 2016-3-20
  */
 public class CertUtils {
+
 	/**
-	 * 生成证书请求
-	 * <pre>-----BEGIN CERTIFICATE REQUEST-----
-	 * xxx
-	 * -----END CERTIFICATE REQUEST-----<pre>
-	 * @param publicKey
-	 * @param privateKey
+	 * 验证证书
+	 * @param cert
 	 * @return
 	 */
-	public static String createReq(PublicKey publicKey, PrivateKey privateKey, String subjectDN) {
-		InputStream in = null;
-		try {
-			// 1好像不行
-			SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
-			PKCS10CertificationRequestBuilder builder = new PKCS10CertificationRequestBuilder(new X500Name(subjectDN), info);
-			ContentSigner sigGen = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(privateKey);
-			PKCS10CertificationRequestHolder holder = builder.build(sigGen);
-			System.out.println(Base64.encode(holder.getEncoded()));
-//			CertificateFactory cf = CertificateFactory.getInstance("X.509");
-//			in = new ByteArrayInputStream(holder.getEncoded());
-//			Certificate req = cf.generateCertificate(in);
-			// 2也不行
-			sun.security.pkcs.PKCS10 csr = new sun.security.pkcs.PKCS10(publicKey);
-			java.security.Signature signature = java.security.Signature.getInstance("SHA1WithRSA");
-			signature.initSign(privateKey);
-			sun.security.x509.X500Name x500Name = new sun.security.x509.X500Name(subjectDN);
-			sun.security.x509.X500Signer x500Signer = new sun.security.x509.X500Signer(signature, x500Name);
-			csr.encodeAndSign(x500Signer);
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			PrintStream pw = new PrintStream("D:/a.csr");
-			csr.print(pw);
-			pw.close();
-			// 3结果和2一样
-			PKCS10CertificationRequest csr1 = new PKCS10CertificationRequest("SHA1withRSA", new X500Principal(subjectDN), publicKey, new DERSet(), privateKey);
-			System.out.println(Base64.encode(csr1.getEncoded()));
-			return null;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		} finally {
-			try {
-				if (in != null) {
-					in.close();
-				}
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}
-	}
-
 	public static Boolean verify(Certificate cert) {
-		return false;
+		return true;
 	}
 
 	/**
@@ -159,7 +100,6 @@ public class CertUtils {
 			crt = new FileInputStream(new File(cerFile));
 			CertificateFactory cf = CertificateFactory.getInstance("x.509");
 			X509Certificate cer = (X509Certificate) cf.generateCertificate(crt);
-			show(cer);
 			return cer;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -179,8 +119,7 @@ public class CertUtils {
 	 * 打印X509证书信息
 	 * @param cer
 	 */
-	private static void show(X509Certificate cert) {
-		System.out.println(cert);
+	public static void print(X509Certificate cert) {
 		System.out.println("输出证书信息:\n" + cert.toString());
 		System.out.println("版本号:" + cert.getVersion());
 		System.out.println("序列号:" + cert.getSerialNumber().toString(16));
