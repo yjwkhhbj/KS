@@ -34,7 +34,7 @@ public class CACenter {
 	// 序列号 每签发一次加1
 	static int serialNumber = 1;
 	// CA的信息
-	private String issuerDN = "C=cn,ST=shanghai,L=shanghai,O=证书签发中心,OU=CA,CN=ca.com";
+	private String issuerDN = "CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn";
 	// CA的私钥
 	private PrivateKey privateKey;
 	// CA的公钥
@@ -50,8 +50,8 @@ public class CACenter {
 		this.issuerDN = issuerDN;
 	}
 
-	public CACenter(String C, String ST, String L, String O, String OU, String CN) {
-		issuerDN = String.format("C=%s,ST=%s,L=%s,O=%s,OU=%s,CN=%s", C, ST, L, O, OU, CN);
+	public CACenter(String CN, String OU, String O, String L, String ST, String C) {
+		issuerDN = String.format("CN=%s,OU=%s,O=%s,L=%s,ST=%s,C=%s", CN, OU, O, L, ST, C);
 	}
 
 	/**
@@ -65,8 +65,14 @@ public class CACenter {
 		privateKey = kp.getPrivate();
 		
 		Date notBefore = new Date();
+		notBefore.setHours(0);
+		notBefore.setMinutes(0);
+		notBefore.setSeconds(0);
 		Date notAfter = new Date();
 		notAfter.setYear(notBefore.getYear() + 10);
+		notAfter.setHours(23);
+		notAfter.setMinutes(59);
+		notAfter.setSeconds(59);
 		// 旧版本包写法
 		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
 		certGen.setSerialNumber(new BigInteger("1"));
@@ -77,7 +83,7 @@ public class CACenter {
 		certGen.setPublicKey(publicKey);
 		certGen.setSignatureAlgorithm(signatureAlgorithm);
 		cacert = certGen.generateX509Certificate(privateKey, "BC");
-		//新版本包写法
+		//新版本包写法，需要bcmail-jdk15-1.46.jar
 //		Date notBefore = new Date();
 //		Date notAfter = notBefore;
 //		notAfter.setYear(notBefore.getYear() + 10);
@@ -103,15 +109,33 @@ public class CACenter {
 	}
 
 	/**
-	 * 根据公钥和公司信息，给别人签发证书
+	 * 根据使用者公钥、使用者信息、CA默认签名算法，给别人签发证书
 	 * @param hisPublicKey
 	 * @param SubjectDN
 	 * @return
 	 */
 	public Certificate sign(PublicKey hisPublicKey, String subjectDN) throws Exception {
+		return sign(hisPublicKey, subjectDN, signatureAlgorithm);
+	}
+
+	/**
+	 * 根据使用者公钥、使用者信息、签名算法，给别人签发证书
+	 * @param hisPublicKey
+	 * @param subjectDN
+	 * @param signatureAlgorithm
+	 * @return
+	 * @throws Exception
+	 */
+	public Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws Exception {
 		Date notBefore = new Date();
+		notBefore.setHours(0);
+		notBefore.setMinutes(0);
+		notBefore.setSeconds(0);
 		Date notAfter = new Date();
 		notAfter.setYear(notBefore.getYear() + 10);
+		notAfter.setHours(23);
+		notAfter.setMinutes(59);
+		notAfter.setSeconds(59);
 		// 旧版本包写法
 		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
 		certGen.setSerialNumber(new BigInteger("" + serialNumber++));
@@ -122,7 +146,7 @@ public class CACenter {
 		certGen.setPublicKey(hisPublicKey);
 		certGen.setSignatureAlgorithm(signatureAlgorithm);
 		X509Certificate newcert = certGen.generateX509Certificate(privateKey, "BC");
-		//新版本包写法
+		//新版本包写法，需要bcmail-jdk15-1.46.jar
 //		X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(new X500Name(issuerDN), new BigInteger("" + serialNumber++), notBefore, notAfter, new X500Name(subjectDN), mPublicKey);
 //		ContentSigner sigGen = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
 //		X509CertificateHolder holder = builder.build(sigGen);
@@ -140,13 +164,23 @@ public class CACenter {
 	 */
 	public Certificate sign(CertificationRequest csr) throws Exception {
 		CertificationRequestInfo csrinfo = csr.getCertificationRequestInfo();
+		// 使用者信息
 		X509Name x509Name = csrinfo.getSubject();
 		String subjectDN = x509Name.toString();
+		// 使用者公钥
 		SubjectPublicKeyInfo info = csrinfo.getSubjectPublicKeyInfo();
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		KeySpec keySpec = new X509EncodedKeySpec(info.getEncoded());
-		PublicKey mPublicKey = kf.generatePublic(keySpec);
-		return sign(mPublicKey, subjectDN);
+		PublicKey hisPublicKey = kf.generatePublic(keySpec);
+		// 使用者的签名算法标识
+		String OID = csr.getSignatureAlgorithm().toString();
+		if ("1.2.840.113549.1.1.5".equals(OID)) {
+			return sign(hisPublicKey, subjectDN, "SHA1withRSA");
+		} else if("1.2.840.113549.1.1.11".equals(OID)) {
+			return sign(hisPublicKey, subjectDN, "SHA256withRSA");
+		} else {
+			return sign(hisPublicKey, subjectDN);
+		}
 	}
 
 	public Certificate getCacert() {

@@ -45,15 +45,17 @@ public class Test {
 	}
 
 	public static void testKeyUtils() throws Exception {
-		KeyUtils.write2RsaKey(privateKey, testDir + "rsa_private.key");
-		KeyUtils.write2PKCS8Key(privateKey, testDir + "pkcs8_private.key");
+		KeyUtils.write2RsaKey(privateKey, testDir + "me.pem");
+		KeyUtils.write2PKCS8Key(privateKey, testDir + "me_pkcs8.pem");
 	}
 
 	public static void testCerReqUtils() throws Exception {
 		// 使用者的信息
-		String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
+		String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
+		// 签名算法
+		String signatureAlgorithm = "SHA1withRSA";
 		// 生成证书请求
-		CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN);
+		CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN, signatureAlgorithm);
 		// 写入文件
 		CertReqUtils.write(csr, testDir + "me.csr");
 	}
@@ -66,10 +68,11 @@ public class Test {
 		KeyUtils.write2RsaKey(caCenter.getPrivateKey(), testDir + "ca.pem");
 		
 		// 签发1 根据公钥和使用者信息
-		String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
+		String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
 		Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
-		CertUtils.write(newcert1, testDir + "newcert1.cer");
+		CertUtils.write(newcert1, testDir + "me_cert1.cer");
 	}
+
 	public static void testCACenter2() throws Exception {
 		// CA初始化2
 		CACenter caCenter = new CACenter();
@@ -78,12 +81,12 @@ public class Test {
 		// 签发2 根据证书请求文件
 		CertificationRequest csr = CertReqUtils.read(testDir + "me.csr");
 		Certificate newcert2 = caCenter.sign(csr);
-		CertUtils.write(newcert2, testDir + "newcert2.cer");
+		CertUtils.write(newcert2, testDir + "me_cert2.cer");
 	}
 	
 	public static void testCertUtils() throws Exception {
 		// 读证书
-		Certificate cert = CertUtils.read(testDir + "newcert1.cer");
+		Certificate cert = CertUtils.read(testDir + "me_cert1.cer");
 		// 查看证书信息
 		CertUtils.print((X509Certificate) cert);
 		// 验证证书

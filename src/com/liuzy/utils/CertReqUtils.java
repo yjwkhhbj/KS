@@ -8,13 +8,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Scanner;
 
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 
 import com.liuzy.util.Base64;
 
@@ -31,14 +27,15 @@ public class CertReqUtils {
 	 * -----END CERTIFICATE REQUEST-----<pre>
 	 * @param publicKey
 	 * @param privateKey
+	 * @param signatureAlgorithm
 	 * @return
 	 */
-	public static CertificationRequest create(PublicKey publicKey, PrivateKey privateKey, String subjectDN) {
+	public static CertificationRequest create(PublicKey publicKey, PrivateKey privateKey, String subjectDN, String signatureAlgorithm) {
 		InputStream in = null;
 		try {
 			// sun的写法
 //			sun.security.pkcs.PKCS10 csr = new sun.security.pkcs.PKCS10(publicKey);
-//			java.security.Signature signature = java.security.Signature.getInstance("SHA1WithRSA");
+//			java.security.Signature signature = java.security.Signature.getInstance(signatureAlgorithm);
 //			signature.initSign(privateKey);
 //			sun.security.x509.X500Name x500Name = new sun.security.x509.X500Name(subjectDN);
 //			sun.security.x509.X500Signer x500Signer = new sun.security.x509.X500Signer(signature, x500Name);
@@ -46,16 +43,16 @@ public class CertReqUtils {
 //			PrintStream pw = new PrintStream("E:/me.csr");
 //			csr.print(pw);
 //			pw.close();
-			// 这样写可以
-			SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
-			PKCS10CertificationRequestBuilder builder = new PKCS10CertificationRequestBuilder(new X500Name(subjectDN), info);
-			ContentSigner sigGen = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(privateKey);
-			PKCS10CertificationRequest scr = new PKCS10CertificationRequest(builder.build(sigGen).getEncoded());
-			return scr;
+			// 这样写可以，需要bcmail-jdk15-1.46.jar
+//			SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+//			PKCS10CertificationRequestBuilder builder = new PKCS10CertificationRequestBuilder(new X500Name(subjectDN), info);
+//			ContentSigner sigGen = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
+//			PKCS10CertificationRequest scr = new PKCS10CertificationRequest(builder.build(sigGen).getEncoded());
+//			return scr;
 			// 这种更简单
-//			X500Principal x500Principal = new X500Principal(subjectDN);
-//			CertificationRequest csr = new PKCS10CertificationRequest("SHA1withRSA", x500Principal, publicKey, new DERSet(), privateKey);
-//			return csr;
+			javax.security.auth.x500.X500Principal x500Principal = new javax.security.auth.x500.X500Principal(subjectDN);
+			CertificationRequest csr = new PKCS10CertificationRequest(signatureAlgorithm, x500Principal, publicKey, new DERSet(), privateKey);
+			return csr;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
