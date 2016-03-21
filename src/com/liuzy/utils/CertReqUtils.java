@@ -121,9 +121,9 @@ public class CertReqUtils {
 		try {
 			StringBuilder sb = new StringBuilder();
 			int index = 0;
-			sb.append("-----BEGIN NEW CERTIFICATE REQUEST-----\n");
+			sb.append("-----BEGIN NEW CERTIFICATE REQUEST-----");
 			for (char c : Base64.encode(csr.getEncoded())) {
-				if (index == 77) {
+				if (index % 77 == 0) {
 					sb.append("\n");
 				}
 				sb.append(c);
