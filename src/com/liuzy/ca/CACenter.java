@@ -16,8 +16,21 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 import com.liuzy.utils.CertUtils;
@@ -126,6 +139,28 @@ public class CACenter {
 	 * @return
 	 * @throws Exception
 	 */
+	public Certificate sign1(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws Exception {
+		Date notBefore = new Date();
+		notBefore.setHours(0);
+		notBefore.setMinutes(0);
+		notBefore.setSeconds(0);
+		Date notAfter = new Date();
+		notAfter.setYear(notBefore.getYear() + 10);
+		notAfter.setHours(23);
+		notAfter.setMinutes(59);
+		notAfter.setSeconds(59);
+		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+		certGen.setSerialNumber(new BigInteger("" + serialNumber++));
+		certGen.setIssuerDN(new X500Principal(issuerDN));
+		certGen.setNotBefore(notBefore);
+		certGen.setNotAfter(notAfter);
+		certGen.setSubjectDN(new X500Principal(subjectDN));
+		certGen.setPublicKey(hisPublicKey);
+		certGen.setSignatureAlgorithm(signatureAlgorithm);
+		X509Certificate newcert = certGen.generateX509Certificate(privateKey, "BC");
+		return newcert;
+	}
+
 	public Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws Exception {
 		Date notBefore = new Date();
 		notBefore.setHours(0);
@@ -136,25 +171,36 @@ public class CACenter {
 		notAfter.setHours(23);
 		notAfter.setMinutes(59);
 		notAfter.setSeconds(59);
-		// 旧版本包写法
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-		certGen.setSerialNumber(new BigInteger("" + serialNumber++));
-		certGen.setIssuerDN(new X500Principal(issuerDN));
-		certGen.setNotBefore(notBefore);
-		certGen.setNotAfter(notAfter);
-		certGen.setSubjectDN(new X500Principal(subjectDN));
-		certGen.setPublicKey(hisPublicKey);
-		certGen.setSignatureAlgorithm(signatureAlgorithm);
-		X509Certificate newcert = certGen.generateX509Certificate(privateKey, "BC");
-		//新版本包写法，需要bcmail-jdk15-1.46.jar
-//		X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(new X500Name(issuerDN), new BigInteger("" + serialNumber++), notBefore, notAfter, new X500Name(subjectDN), mPublicKey);
-//		ContentSigner sigGen = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
-//		X509CertificateHolder holder = builder.build(sigGen);
+
+	    JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+	    AuthorityKeyIdentifier auth = extUtils.createAuthorityKeyIdentifier(publicKey);
+	    SubjectKeyIdentifier subj = extUtils.createSubjectKeyIdentifier(hisPublicKey);
+	    
+		X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(new X500Name(issuerDN), new BigInteger("" + serialNumber++), notBefore, notAfter, new X500Name(subjectDN), hisPublicKey);
+		certBuilder.addExtension(X509Extension.authorityKeyIdentifier, false, auth);
+		certBuilder.addExtension(X509Extension.basicConstraints, false, new BasicConstraints(false));
+		certBuilder.addExtension(X509Extension.subjectKeyIdentifier, false, subj);
+		
+		ContentSigner caSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
+		X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certBuilder.build(caSigner));
+		
+//		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureAlgorithm);
+//	    AlgorithmIdentifier digestAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+//		AsymmetricKeyParameter paramAsymmetricKeyParameter = PrivateKeyFactory.createKey(privateKey.getEncoded());
+//		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digestAlgId).build(paramAsymmetricKeyParameter);
+//		
+//		X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
+//		X509CertificateStructure certificate = certificateHolder.toASN1Structure();
+//		
 //		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-//		InputStream in = new ByteArrayInputStream(holder.toASN1Structure().getEncoded());
-//		X509Certificate newcert = (X509Certificate) cf.generateCertificate(in);
-//		in.close();
-		return newcert;
+//		InputStream bis = new ByteArrayInputStream(certificate.getEncoded());
+//		X509Certificate cert = (X509Certificate) cf.generateCertificate(bis);
+//		bis.close();
+
+		cert.checkValidity(new Date());
+		cert.verify(cert.getPublicKey());
+		System.out.println(cert);
+		return cert;
 	}
 
 	/**

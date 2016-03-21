@@ -4,13 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Scanner;
 
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 
 import com.liuzy.util.Base64;
 
@@ -74,18 +76,25 @@ public class CertReqUtils {
 	 */
 	public static CertificationRequest read(String csrFile) {
 		InputStream csrIn = null;
-		Scanner scanner = null;
+		InputStreamReader inReader = null;
+		PemReader pr = null;
+//		Scanner scanner = null;
 		try {
 			csrIn = new FileInputStream(new File(csrFile));
-			scanner = new Scanner(csrIn);
-			StringBuilder sb = new StringBuilder();
-			while (scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				if (!line.contains(" ")) {
-					sb.append(line);
-				}
-			}
-			byte[] bytes = Base64.decode(sb.toString().toCharArray());
+			inReader = new InputStreamReader(csrIn);
+			pr = new PemReader(inReader);
+			PemObject po = pr.readPemObject();
+			byte[] bytes = po.getContent();
+//			csrIn = new FileInputStream(new File(csrFile));
+//			scanner = new Scanner(csrIn);
+//			StringBuilder sb = new StringBuilder();
+//			while (scanner.hasNextLine()) {
+//				String line = scanner.nextLine();
+//				if (!line.contains(" ")) {
+//					sb.append(line);
+//				}
+//			}
+//			byte[] bytes = Base64.decode(sb.toString().toCharArray());
 			CertificationRequest csr = new PKCS10CertificationRequest(bytes);
 			return csr;
 		} catch (Exception e) {
@@ -93,8 +102,14 @@ public class CertReqUtils {
 			return null;
 		} finally {
 			try {
-				if (scanner != null) {
-					scanner.close();
+//				if (scanner != null) {
+//					scanner.close();
+//				}
+				if (pr != null) {
+					pr.close();
+				}
+				if (inReader != null) {
+					inReader.close();
 				}
 				if (csrIn != null) {
 					csrIn.close();
