@@ -1,72 +1,12 @@
-KS
----
-- 玩转私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
-- bcpkix-jdk15on-1.54.jar
-- bcprov-jdk15on-1.54.jar
+# 双向认证完整示例
+- 以下测试在VMware虚拟机中的CentOS6.5中完成
+- 用openssl生成CA私钥、公钥、自签证书；
+- 用openssl签发Nginx服务器证书
+- 用openssl签发客户端证书
+- 安装、配置Nginx服务器，一步一步从单向认证到双向认证
+- 安装、配置NodeJS环境，生成Nodejs项目，返回JSON
 
-示例
----
-### 运行com.liuzy.test.CaTest类的main方法看效果
-
-### 输出me的私钥和pkcs8私钥
-```java
-KeyUtils.write2RsaKey(privateKey, testDir + "me.pem");
-KeyUtils.write2PKCS8Key(privateKey, testDir + "me_pkcs8.pem");
-```
-### 生成me的证书请求文件
-```java
-// 使用者的信息
-String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
-// 签名算法
-String signatureAlgorithm = "SHA1withRSA";
-// 生成证书请求
-PKCS10CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN, signatureAlgorithm);
-// 写入文件
-CertReqUtils.write(csr, testDir + "me.csr");
-```
-
-### 初始化证书中心，输CA私钥和CA自签证书，并使用me的公钥和me的信息给他签发证书
-```java
-// CA初始化1
-CACenter caCenter = new CACenter();
-caCenter.init();
-CertUtils.write(caCenter.getCacert(), testDir + "ca.crt");
-KeyUtils.write2RsaKey(caCenter.getPrivateKey(), testDir + "ca.pem");
-
-// 签发1 根据公钥和使用者信息
-String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
-Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
-CertUtils.write(newcert1, testDir + "newcert1.cer");
-```
-
-### 用CA私钥和CA自签证书初始化证书中心，并用me的证书请求给他签发证书
-```java
-// CA初始化2
-CACenter caCenter = new CACenter();
-caCenter.init(testDir + "ca.crt", testDir + "ca.pem");
-
-// 签发2 根据证书请求文件
-CertificationRequest csr = CertReqUtils.read(testDir + "me.csr");
-Certificate newcert2 = caCenter.sign(csr);
-CertUtils.write(newcert2, testDir + "newcert2.cer");
-```
-
-### 读证书，打印证书信息
-```java
-// 读证书
-Certificate cert = CertUtils.read(testDir + "newcert1.cer");
-// 查看证书信息
-CertUtils.print((X509Certificate) cert);
-// 验证证书
-System.out.println(CertUtils.verify(cert));
-```
-
-# -----------------------------------------------------
-
-## 双向认证完整示例
-以下测试在VMware虚拟机中的CentOS6.5中完成
-
-## 用root登陆执行脚本
+# 用root登陆执行脚本
 
 - 执行clear.sh
 
@@ -95,7 +35,7 @@ CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 安装了NodeJS、项目生成器、后台运行器
 ```
 
-## 使用liuzy或普通用户登陆
+# 使用liuzy或普通用户登陆
 
 - 创建项目
 
@@ -120,7 +60,7 @@ cd ~
 forever start -o test.log test/bin/www
 # 看是否运行，项目默认访问端口是3000
 lsof -i :3000
-## 用root配置nginx
+# 用root配置nginx
 ```
 
 - 查看日志
@@ -138,7 +78,7 @@ tail -f test.log
 {"name":"liuzy","QQ":"416657468"}
 ```
 
-## 配置Nginx
+# 配置Nginx
 
 - 编辑/etc/nginx/nginx.conf，在http的大括号内的最后加上配置
 
@@ -175,7 +115,7 @@ server {
 
 `nginx -s reload`
 
-## 修改host
+# 修改host
 
 - 修改本机Windows系统的host文件
 
@@ -193,16 +133,14 @@ server {
 打开cmd，输入ping liuzy.com，观察是否转到虚拟机IP
 ```
 
-## 访问项目
+# 访问项目
 
-```
-这时，你用浏览器访问http://liuzy.com或者http://www.liuzy.com，请求会被系统DNS到你的虚拟机
-虚拟机中的nginx收到请求，会将你的地址重定向到https://www.liuzy.com
-然后转发到虚拟机的3000端口，NodeJS项目test会给你返回一个JSON字符串
-到此已经完成了单向认证，双向认证请继续
-```
+- 这时，你用浏览器访问`http://liuzy.com`或者`http://www.liuzy.com`，请求会被系统DNS到你的虚拟机
+- 虚拟机中的nginx收到请求，会将你的地址重定向到`https://www.liuzy.com`
+- 然后转发到虚拟机的3000端口，NodeJS项目test会给你返回一个JSON字符串
+- 到此已经完成了单向认证，双向认证请继续
 
-## 双向认证
+# 双向认证
 
 - 打开双向认证
 
@@ -231,3 +169,67 @@ No required SSL certificate was sent
 运行com.liuzy.test.HttpsTest类的main方法；
 看，返回了结果！
 ```
+
+# -----------------------------------------------------
+
+# Java实现私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
+
+- 需要导入包
+- bcpkix-jdk15on-1.54.jar
+- bcprov-jdk15on-1.54.jar
+- 运行com.liuzy.test.CaTest类的main方法看效果
+
+# 输出me的私钥和pkcs8私钥
+```java
+KeyUtils.write2RsaKey(privateKey, testDir + "me.pem");
+KeyUtils.write2PKCS8Key(privateKey, testDir + "me_pkcs8.pem");
+```
+
+# 生成me的证书请求文件
+```java
+// 使用者的信息
+String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
+// 签名算法
+String signatureAlgorithm = "SHA1withRSA";
+// 生成证书请求
+PKCS10CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN, signatureAlgorithm);
+// 写入文件
+CertReqUtils.write(csr, testDir + "me.csr");
+```
+
+# 初始化证书中心，输CA私钥和CA自签证书，并使用me的公钥和me的信息给他签发证书
+```java
+// CA初始化1
+CACenter caCenter = new CACenter();
+caCenter.init();
+CertUtils.write(caCenter.getCacert(), testDir + "ca.crt");
+KeyUtils.write2RsaKey(caCenter.getPrivateKey(), testDir + "ca.pem");
+
+// 签发1 根据公钥和使用者信息
+String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
+Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
+CertUtils.write(newcert1, testDir + "newcert1.cer");
+```
+
+# 用CA私钥和CA自签证书初始化证书中心，并用me的证书请求给他签发证书
+```java
+// CA初始化2
+CACenter caCenter = new CACenter();
+caCenter.init(testDir + "ca.crt", testDir + "ca.pem");
+
+// 签发2 根据证书请求文件
+CertificationRequest csr = CertReqUtils.read(testDir + "me.csr");
+Certificate newcert2 = caCenter.sign(csr);
+CertUtils.write(newcert2, testDir + "newcert2.cer");
+```
+
+# 读证书，打印证书信息
+```java
+// 读证书
+Certificate cert = CertUtils.read(testDir + "newcert1.cer");
+// 查看证书信息
+CertUtils.print((X509Certificate) cert);
+// 验证证书
+System.out.println(CertUtils.verify(cert));
+```
+
