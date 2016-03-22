@@ -62,20 +62,9 @@ System.out.println(CertUtils.verify(cert));
 ```
 
 创建双向认证服务器
+---
 
-#!/bin/bash
 
-echo '生成CA私钥'
-cd /etc/pki/CA/private
-openssl genrsa -out cakey.pem 2048
-
-echo '生成自签证书 cn sh sh liuzy CA CA'
-cd /etc/pki/CA/
-openssl req -new -x509 -key private/cakey.pem -out cacert.pem -days 3650
-
-mkdir liuzy
-
-echo '创建服务器证书'
 
 图形化界面
 ---
