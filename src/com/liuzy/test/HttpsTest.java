@@ -7,10 +7,10 @@ import com.liuzy.http.KsManager;
 
 public class HttpsTest {
 	public static void main(String[] args) {
-		String clientCrt = "E:/client.crt";
-		String clientPem = "E:/client.pem";
+		String clientCrt = "D:/client.crt";
+		String clientPem = "D:/client.pem";
 		String keyStorePwd = "123456";
-		String serverCrt = "E:/nginx.crt";
+		String serverCrt = "D:/nginx.crt";
 		
 		KeyStore keyStore = KsManager.getKeyStoreByCrtPem(clientCrt, clientPem, keyStorePwd);
 		KeyStore trustStore = KsManager.getTrustStoreByCrt(serverCrt);

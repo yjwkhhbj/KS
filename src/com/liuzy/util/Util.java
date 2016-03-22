@@ -19,7 +19,7 @@ public class Util {
 
 	public static void show(KeyStore ks, String pwd) throws Exception {
 		try {
-			Util.log(tag, "------------------------------------");
+			Util.log(tag, "--------------KeyStore信息---------------");
 			Util.log(tag, "Provider : " + ks.getProvider().getName());
 			Util.log(tag, "Type : " + ks.getType());
 			Util.log(tag, "Size : " + ks.size());
