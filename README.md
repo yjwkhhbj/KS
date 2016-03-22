@@ -172,7 +172,7 @@ No required SSL certificate was sent
 看，返回了结果！
 ```
 
-Java实现私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
+Java实现证书请求，证书签发、输出等等
 ---
 
 - 需要导入包
