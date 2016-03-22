@@ -106,7 +106,7 @@ res.send({name:"liuzy",QQ:"416657468"});
 ```
 - 启动项目
 
-```
+```shell
 cd ~
 forever start -o test.log test/bin/www
 # 看是否运行，项目默认访问端口是3000
@@ -115,7 +115,7 @@ lsof -i :3000
 ```
 - 查看日志
 
-```
+```shell
 cd ~
 tail -f test.log
 ```
