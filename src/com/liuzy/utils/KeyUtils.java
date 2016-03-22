@@ -9,9 +9,11 @@ import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.PKCS8Generator;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 /**
@@ -24,25 +26,28 @@ public class KeyUtils {
 
 	/**
 	 * 读私钥文件
+	 * 
 	 * @param pemFile
 	 * @return
 	 */
 	public static KeyPair read(String pemFile) {
 		InputStream pemIn = null;
 		InputStreamReader inReader = null;
-		PEMReader pemReader = null;
+		PEMParser pemParser = null;
 		try {
 			pemIn = new FileInputStream(new File(pemFile));
 			inReader = new InputStreamReader(pemIn);
-			pemReader = new PEMReader(inReader);
-			return (KeyPair) pemReader.readObject();
+			pemParser = new PEMParser(inReader);
+			PEMKeyPair kp = (PEMKeyPair) pemParser.readObject();
+			JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+			return converter.getKeyPair(kp);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		} finally {
 			try {
-				if (pemReader != null) {
-					pemReader.close();
+				if (pemParser != null) {
+					pemParser.close();
 				}
 				if (inReader != null) {
 					inReader.close();
@@ -58,9 +63,13 @@ public class KeyUtils {
 
 	/**
 	 * 把私钥储存为普通RSA格式的文件
-	 * <pre>-----BEGIN RSA PRIVATE KEY-----
+	 * 
+	 * <pre>
+	 * -----BEGIN RSA PRIVATE KEY-----
 	 * xxx
-	 * -----END RSA PRIVATE KEY-----</pre>
+	 * -----END RSA PRIVATE KEY-----
+	 * </pre>
+	 * 
 	 * @param pk
 	 * @param path
 	 */
@@ -85,17 +94,21 @@ public class KeyUtils {
 
 	/**
 	 * 输出普通RSA格式字符串
-	 * <pre>-----BEGIN RSA PRIVATE KEY-----
+	 * 
+	 * <pre>
+	 * -----BEGIN RSA PRIVATE KEY-----
 	 * xxx
-	 * -----END RSA PRIVATE KEY-----</pre>
+	 * -----END RSA PRIVATE KEY-----
+	 * </pre>
+	 * 
 	 * @param pk
 	 */
 	public static String toRsaKeyStr(PrivateKey pk) {
 		StringWriter sw = null;
-		PEMWriter pw = null;
+		JcaPEMWriter pw = null;
 		try {
 			sw = new StringWriter();
-			pw = new PEMWriter(sw);
+			pw = new JcaPEMWriter(sw);
 			pw.writeObject(pk);
 			pw.flush();
 			sw.flush();
@@ -116,12 +129,16 @@ public class KeyUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * 把私钥储存为PKCS8格式的文件
-	 * <pre>-----BEGIN PRIVATE KEY-----
+	 * 
+	 * <pre>
+	 * -----BEGIN PRIVATE KEY-----
 	 * xxx
-	 * -----END PRIVATE KEY-----</pre>
+	 * -----END PRIVATE KEY-----
+	 * </pre>
+	 * 
 	 * @param pk
 	 * @param path
 	 */
@@ -143,12 +160,16 @@ public class KeyUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * 输出私钥为PKCS8格式字符串
-	 * <pre>-----BEGIN PRIVATE KEY-----
+	 * 
+	 * <pre>
+	 * -----BEGIN PRIVATE KEY-----
 	 * xxx
-	 * -----END PRIVATE KEY-----</pre>
+	 * -----END PRIVATE KEY-----
+	 * </pre>
+	 * 
 	 * @param pk
 	 */
 	public static String toPKCS8KeyStr(PrivateKey pk) {
@@ -157,7 +178,7 @@ public class KeyUtils {
 		try {
 			sw = new StringWriter();
 			pw = new PemWriter(sw);
-			PKCS8Generator generator = new PKCS8Generator(pk);
+			JcaPKCS8Generator generator = new JcaPKCS8Generator(pk, null);
 			pw.writeObject(generator);
 			pw.flush();
 			sw.flush();

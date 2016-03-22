@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -13,7 +12,9 @@ import java.security.cert.CertificateFactory;
 
 import javax.crypto.Cipher;
 
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
 import com.liuzy.util.Util;
 
@@ -34,15 +35,16 @@ public class KsManager {
 	public static KeyStore getKeyStoreByCrtPem(String crtFile, String pemFile, String keyStorePwd) {
 		InputStream pem = null;
 		InputStreamReader inReader = null;
-		PEMReader pemReader = null;
+		PEMParser pemParser = null;
 		InputStream crt = null;
 		try {
 			// 客户端私钥
 			pem = new FileInputStream(new File(pemFile));
 			inReader = new InputStreamReader(pem);
-			pemReader = new PEMReader(inReader);
-			KeyPair keyPair = (KeyPair) pemReader.readObject();
-			PrivateKey privateKey = keyPair.getPrivate();
+			pemParser = new PEMParser(inReader);
+			PEMKeyPair kp = (PEMKeyPair) pemParser.readObject();
+			JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+			PrivateKey privateKey = converter.getKeyPair(kp).getPrivate();
 
 			// 客户端证书
 			crt = new FileInputStream(new File(crtFile));
@@ -73,8 +75,8 @@ public class KsManager {
 				if (inReader != null) {
 					inReader.close();
 				}
-				if (pemReader != null) {
-					pemReader.close();
+				if (pemParser != null) {
+					pemParser.close();
 				}
 				if (crt != null) {
 					crt.close();
