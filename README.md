@@ -64,11 +64,12 @@ System.out.println(CertUtils.verify(cert));
 # -----------------------------------------------------
 
 ## 以下测试在VMware虚拟机中的CentOS6.5中完成
-
-## 用root登陆执行脚本
+用root登陆执行脚本
 
 ## 执行clear.sh
-```清除了CA密钥和签发库```
+```
+清除了CA密钥和签发库
+```
 
 ## 执行create.sh
 ```
