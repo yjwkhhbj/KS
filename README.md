@@ -90,7 +90,8 @@ CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 
 ## 使用liuzy或普通用户登陆
 - 创建项目
-```shell
+
+```
 # 新建nodejs项目test
 express test -e
 # 进入项目目录
@@ -104,6 +105,7 @@ vim routes/index.js
 res.send({name:"liuzy",QQ:"416657468"});
 ```
 - 启动项目
+
 ```
 cd ~
 forever start -o test.log test/bin/www
@@ -112,11 +114,13 @@ lsof -i :3000
 ## 用root配置nginx
 ```
 - 查看日志
+
 ```
 cd ~
 tail -f test.log
 ```
 - 访问项目
+
 ```
 浏览器打开http://你主机的IP:3000
 会看到服务器返回了一个JSON，内容是：
@@ -126,6 +130,7 @@ tail -f test.log
 ## 配置Nginx
 
 - 编辑/etc/nginx/nginx.conf，在http的大括号内的最后加上配置
+
 ```
 server {
 	listen 80;
@@ -152,12 +157,15 @@ server {
 }
 ```
 - 测试配置是否正确，正确会输出successful
+
 `nginx -t`
 - 应用配置，没有任何返回信息说明成功了
+
 `nginx -s reload`
 
 ## 修改host
 - 修改本机Windows系统的host文件
+
 ```
 (如果你的win8,win10，你先把hosts复制到桌面或项目地方，改好了再拖进来)
 打开`C:\Windows\System32\drivers\etc`文件夹
@@ -166,6 +174,7 @@ server {
 192.168.31.186 www.liuzy.com
 ```
 - 测试修改
+
 ```
 打开cmd，输入ping liuzy.com，观察是否转到虚拟机IP
 ``` 
@@ -181,6 +190,7 @@ server {
 
 ## 双向认证
 - 打开双向认证
+
 ```
 用root用户登陆，编辑/etc/nginx/nginx.conf
 解开双向认证注释：
@@ -190,10 +200,12 @@ ssl_verify_client on;
 nginx -s reload
 ```
 - 此时用浏览器访问，你会看到：(因为你没有被服务器信任的证书)
+
 ```
 No required SSL certificate was sent
 ```
 - 用程序加载证书请求服务器
+
 ```
 把create.sh脚本签发的客户端证书下载到你的系统，保存到E盘；
 /etc/pki/CA/myssl/client.pem
