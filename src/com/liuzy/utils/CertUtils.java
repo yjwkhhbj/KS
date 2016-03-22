@@ -4,13 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
 /**
  * 证书
@@ -20,68 +18,31 @@ import org.bouncycastle.openssl.PEMWriter;
 public class CertUtils {
 
 	/**
-	 * 验证证书
-	 * @param cert
-	 * @return
-	 */
-	public static Boolean verify(Certificate cert) {
-		return true;
-	}
-
-	/**
 	 * 证书写入文件
 	 * <pre>-----BEGIN CERTIFICATE-----
 	 * xxx
 	 * -----END CERTIFICATE-----</pre>
-	 * @param cer
+	 * @param chain
 	 * @param path
 	 */
-	public static void write(Certificate cer, String path) {
+	public static void write(X509Certificate cert, String path) {
 		FileWriter fw = null;
+		JcaPEMWriter pw = null;
 		try {
 			fw = new FileWriter(new File(path));
-			fw.write(toCerStr(cer));
+			pw = new JcaPEMWriter(fw);
+			pw.writeObject(cert);
+			pw.flush();
 			fw.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (fw != null) {
-					fw.close();
-				}
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * 输出证书Base64字符串
-	 * <pre>-----BEGIN CERTIFICATE-----
-	 * xxx
-	 * -----END CERTIFICATE-----</pre>
-	 * @param cer
-	 */
-	public static String toCerStr(Certificate cer) {
-		StringWriter sw = null;
-		PEMWriter pw = null;
-		try {
-			sw = new StringWriter();
-			pw = new PEMWriter(sw);
-			pw.writeObject(cer);
-			pw.flush();
-			sw.flush();
-			return sw.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		} finally {
-			try {
 				if (pw != null) {
 					pw.close();
 				}
-				if (sw != null) {
-					sw.close();
+				if (fw != null) {
+					fw.close();
 				}
 			} catch (Exception e2) {
 				e2.printStackTrace();
@@ -94,13 +55,13 @@ public class CertUtils {
 	 * @param cerFile
 	 * @return
 	 */
-	public static Certificate read(String cerFile) {
+	public static X509Certificate read(String cerFile) {
 		InputStream crt = null;
 		try {
 			crt = new FileInputStream(new File(cerFile));
 			CertificateFactory cf = CertificateFactory.getInstance("x.509");
-			X509Certificate cer = (X509Certificate) cf.generateCertificate(crt);
-			return cer;
+			X509Certificate cert = (X509Certificate) cf.generateCertificate(crt);
+			return cert;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

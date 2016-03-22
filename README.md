@@ -1,7 +1,8 @@
 KS
 ---
-玩转私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
-
+- 玩转私钥、公钥、证书、证书请求，CA中心、证书签发、对象转文件、文件转对象等等
+- bcpkix-jdk15on-1.54.jar
+- bcprov-jdk15on-1.54.jar
 
 示例
 ---
@@ -9,15 +10,17 @@ KS
 
 ### 输出me的私钥和pkcs8私钥
 ```java
-KeyUtils.write2RsaKey(privateKey, testDir + "rsa_private.key");
-KeyUtils.write2PKCS8Key(privateKey, testDir + "pkcs8_private.key");
+KeyUtils.write2RsaKey(privateKey, testDir + "me.pem");
+KeyUtils.write2PKCS8Key(privateKey, testDir + "me_pkcs8.pem");
 ```
 ### 生成me的证书请求文件
 ```java
 // 使用者的信息
-String subjectDN = "C=cn,ST=shanghai,L=shanghai,O=我公司,OU=我公司,CN=me.com";
+String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
+// 签名算法
+String signatureAlgorithm = "SHA1withRSA";
 // 生成证书请求
-CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN);
+PKCS10CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subjectDN, signatureAlgorithm);
 // 写入文件
 CertReqUtils.write(csr, testDir + "me.csr");
 ```

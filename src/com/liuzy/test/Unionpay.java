@@ -5,7 +5,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -38,7 +38,7 @@ class Terminal {
 	private String terId;
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
-	private Certificate cert;
+	private X509Certificate cert;
 	public Terminal(String merId, String terId) {
 		this.merId = merId;
 		this.terId = terId;
@@ -85,10 +85,10 @@ class Terminal {
 	public void setPrivateKey(PrivateKey privateKey) {
 		this.privateKey = privateKey;
 	}
-	public Certificate getCert() {
+	public X509Certificate getCert() {
 		return cert;
 	}
-	public void setCert(Certificate cert) {
+	public void setCert(X509Certificate cert) {
 		this.cert = cert;
 	}
 }
