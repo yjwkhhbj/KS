@@ -6,11 +6,12 @@ import com.liuzy.http.HTTPS;
 import com.liuzy.http.KsManager;
 
 public class HttpsTest {
+	static String testDir = "D:/";
 	public static void main(String[] args) {
-		String clientCrt = "D:/client.crt";
-		String clientPem = "D:/client.pem";
+		String clientCrt = testDir + "client.crt";
+		String clientPem = testDir + "client.pem";
 		String keyStorePwd = "123456";
-		String serverCrt = "D:/nginx.crt";
+		String serverCrt = testDir + "nginx.crt";
 		
 		KeyStore keyStore = KsManager.getKeyStoreByCrtPem(clientCrt, clientPem, keyStorePwd);
 		KeyStore trustStore = KsManager.getTrustStoreByCrt(serverCrt);

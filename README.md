@@ -1,4 +1,4 @@
-服务器、客户端双向认证完整示例
+第一部分：服务器、客户端双向认证完整示例
 ---
 
 - 以下测试在VMware虚拟机中的CentOS6.5中完成
@@ -172,7 +172,7 @@ No required SSL certificate was sent
 看，返回了结果！
 ```
 
-Java实现证书请求，证书签发、输出等等
+第二部分：Java实现证书请求，证书签发、输出等等
 ---
 
 - 需要导入包
@@ -180,13 +180,17 @@ Java实现证书请求，证书签发、输出等等
 - bcprov-jdk15on-1.54.jar
 - 运行com.liuzy.test.CaTest类的main方法看效果
 
-# 输出me的私钥和pkcs8私钥
+# 示例
+
+- 输出me的私钥和pkcs8私钥
+
 ```java
 KeyUtils.write2RsaKey(privateKey, testDir + "me.pem");
 KeyUtils.write2PKCS8Key(privateKey, testDir + "me_pkcs8.pem");
 ```
 
-# 生成me的证书请求文件
+- 生成me的证书请求文件
+
 ```java
 // 使用者的信息
 String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
@@ -198,7 +202,7 @@ PKCS10CertificationRequest csr = CertReqUtils.create(publicKey, privateKey, subj
 CertReqUtils.write(csr, testDir + "me.csr");
 ```
 
-# 初始化证书中心，输CA私钥和CA自签证书，并使用me的公钥和me的信息给他签发证书
+- 初始化证书中心，输CA私钥和CA自签证书，并使用me的公钥和me的信息给他签发证书
 ```java
 // CA初始化1
 CACenter caCenter = new CACenter();
@@ -212,7 +216,8 @@ Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
 CertUtils.write(newcert1, testDir + "newcert1.cer");
 ```
 
-# 用CA私钥和CA自签证书初始化证书中心，并用me的证书请求给他签发证书
+- 用CA私钥和CA自签证书初始化证书中心，并用me的证书请求给他签发证书
+
 ```java
 // CA初始化2
 CACenter caCenter = new CACenter();
@@ -224,7 +229,8 @@ Certificate newcert2 = caCenter.sign(csr);
 CertUtils.write(newcert2, testDir + "newcert2.cer");
 ```
 
-# 读证书，打印证书信息
+- 读证书，打印证书信息
+
 ```java
 // 读证书
 Certificate cert = CertUtils.read(testDir + "newcert1.cer");
@@ -233,4 +239,39 @@ CertUtils.print((X509Certificate) cert);
 // 验证证书
 System.out.println(CertUtils.verify(cert));
 ```
+
+
+第三部分：服务器使用Java签发的证书
+---
+
+- 运行com.liuzy.test.MyServer类的main方法，输出证书等文件
+
+- 把证书上传到服务器
+
+```shell
+# 用liuzy或普通用户登陆
+mkdir ssl
+# 上传ca.crt、nginx.crt、nginx.pem上传到此
+```
+
+- root用户修改Nginx配置
+```
+# 把原来的三行用#注释，添加以下
+ssl_certificate /home/liuzy/ssl/nginx.crt;
+ssl_certificate_key /home/liuzy/ssl/nginx.pem;
+ssl_client_certificate /home/liuzy/ssl/ca.crt;
+# 应用配置
+nginx -s reload
+```
+
+- 运行com.liuzy.test.HttpsTest类的main方法，请求服务器
+
+```
+恭喜你，成功看到结果：
+[  GET] https://www.liuzy.com
+[RESUT] {"name":"liuzy","QQ":"416657468"}
+```
+
+
+<全文完>
 

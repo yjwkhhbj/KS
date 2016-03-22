@@ -104,6 +104,7 @@ public class CACenter {
 	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN) throws Exception {
 		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
 	}
+
 	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws Exception {
 		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
 	}
@@ -151,6 +152,18 @@ public class CACenter {
 		ASN1ObjectIdentifier OID = req.getSignatureAlgorithm().getAlgorithm();
 		DefaultAlgorithmNameFinder finder = new DefaultAlgorithmNameFinder();
 		return sign(req.getPublicKey(), req.getSubject(), finder.getAlgorithmName(OID));
+	}
+
+	public void saveCert(String path) {
+		CertUtils.write(cacert, path);
+	}
+
+	public void saveRsaKey(String path) {
+		KeyUtils.write2RsaKey(privateKey, path);
+	}
+
+	public void savePkcs8Key(String path) {
+		KeyUtils.write2PKCS8Key(privateKey, path);
 	}
 
 	public X509Certificate getCacert() {
