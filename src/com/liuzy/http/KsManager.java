@@ -1,4 +1,4 @@
-package com.liuzy.ks;
+package com.liuzy.http;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -178,6 +178,33 @@ public class KsManager {
 	}
 
 	/**
+	 * @param jksFile
+	 * @return
+	 */
+	public static KeyStore getTrustStoreByJks(String jksFile, String bksPwd) {
+		InputStream bksIn = null;
+		try {
+			bksIn = new FileInputStream(new File(jksFile));
+			KeyStore keyStore = KeyStore.getInstance("JKS");
+			keyStore.load(bksIn, bksPwd.toCharArray());
+			Util.show(keyStore, bksPwd);
+			return keyStore;
+		} catch (Exception e) {
+			Util.log(tag, "创建客户端信任的服务器证书仓库失败");
+			e.printStackTrace();
+			return null;
+		} finally {
+			try {
+				if (bksIn != null) {
+					bksIn.close();
+				}
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
+	
+	/**
 	 * @param bksFile
 	 * @return
 	 */
@@ -185,7 +212,7 @@ public class KsManager {
 		InputStream bksIn = null;
 		try {
 			bksIn = new FileInputStream(new File(bksFile));
-			KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			KeyStore keyStore = KeyStore.getInstance("BKS");
 			keyStore.load(bksIn, bksPwd.toCharArray());
 			Util.show(keyStore, bksPwd);
 			return keyStore;

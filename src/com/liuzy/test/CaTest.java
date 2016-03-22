@@ -15,7 +15,7 @@ import com.liuzy.utils.CertReqUtils;
 import com.liuzy.utils.CertUtils;
 import com.liuzy.utils.KeyUtils;
 
-public class Test {
+public class CaTest {
 	private static PublicKey publicKey;
 	private static PrivateKey privateKey;
 	

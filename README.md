@@ -6,7 +6,7 @@ KS
 
 示例
 ---
-### 运行com.liuzy.test.Test类的main方法看效果
+### 运行com.liuzy.test.CaTest类的main方法看效果
 
 ### 输出me的私钥和pkcs8私钥
 ```java
