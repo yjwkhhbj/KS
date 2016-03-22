@@ -63,15 +63,19 @@ System.out.println(CertUtils.verify(cert));
 
 # -----------------------------------------------------
 
-## 以下测试在VMware虚拟机中的CentOS6.5中完成
-用root登陆执行脚本
+## 双向认证完整示例
+以下测试在VMware虚拟机中的CentOS6.5中完成
 
-## 执行clear.sh
+## 用root登陆执行脚本
+
+- 执行clear.sh
+
 ```
 清除了CA密钥和签发库
 ```
 
-## 执行create.sh
+- 执行create.sh
+
 ```
 CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 生成Nginx证书请求依次输入：cn sh sh liuzy nginx nginx，然后回车跳过其他输入；
@@ -80,15 +84,19 @@ CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 签发Client证书输入两次y回车确认
 ```
 
-## 执行nginx.sh
+- 执行nginx.sh
+
 ```
 打开浏览器，输入主机IP，可以访问Nginx主页
 ```
 
-## 执行nodejs.sh
-- 安装NodeJS、项目生成器、后台运行器
+- 执行nodejs.sh
+```
+安装了NodeJS、项目生成器、后台运行器
+```
 
 ## 使用liuzy或普通用户登陆
+
 - 创建项目
 
 ```shell
@@ -104,6 +112,7 @@ vim routes/index.js
 # 改为
 res.send({name:"liuzy",QQ:"416657468"});
 ```
+
 - 启动项目
 
 ```shell
@@ -113,12 +122,14 @@ forever start -o test.log test/bin/www
 lsof -i :3000
 ## 用root配置nginx
 ```
+
 - 查看日志
 
 ```shell
 cd ~
 tail -f test.log
 ```
+
 - 访问项目
 
 ```
@@ -156,6 +167,7 @@ server {
 	}
 }
 ```
+
 - 测试配置是否正确，正确会输出successful
 
 `nginx -t`
@@ -164,6 +176,7 @@ server {
 `nginx -s reload`
 
 ## 修改host
+
 - 修改本机Windows系统的host文件
 
 ```
@@ -173,6 +186,7 @@ server {
 192.168.31.186 liuzy.com
 192.168.31.186 www.liuzy.com
 ```
+
 - 测试修改
 
 ```
@@ -180,15 +194,16 @@ server {
 ```
 
 ## 访问项目
+
+```
 这时，你用浏览器访问http://liuzy.com或者http://www.liuzy.com，请求会被系统DNS到你的虚拟机
-
 虚拟机中的nginx收到请求，会将你的地址重定向到https://www.liuzy.com
-
 然后转发到虚拟机的3000端口，NodeJS项目test会给你返回一个JSON字符串
-
 到此已经完成了单向认证，双向认证请继续
+```
 
 ## 双向认证
+
 - 打开双向认证
 
 ```
@@ -199,11 +214,13 @@ ssl_verify_client on;
 应用配置还需要：
 nginx -s reload
 ```
+
 - 此时用浏览器访问，你会看到：(因为你没有被服务器信任的证书)
 
 ```
 No required SSL certificate was sent
 ```
+
 - 用程序加载证书请求服务器
 
 ```
