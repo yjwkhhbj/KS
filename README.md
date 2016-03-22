@@ -91,7 +91,7 @@ CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 ## 使用liuzy或普通用户登陆
 - 创建项目
 
-```
+```shell
 # 新建nodejs项目test
 express test -e
 # 进入项目目录
@@ -177,7 +177,7 @@ server {
 
 ```
 打开cmd，输入ping liuzy.com，观察是否转到虚拟机IP
-``` 
+```
 
 ## 访问项目
 这时，你用浏览器访问http://liuzy.com或者http://www.liuzy.com，请求会被系统DNS到你的虚拟机
