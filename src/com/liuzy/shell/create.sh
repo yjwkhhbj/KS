@@ -17,7 +17,7 @@ cd myssl
 echo '##### => 生成nginx私钥'
 openssl genrsa -out nginx.pem 2048
 
-echo '##### => 生成nginx证书请求 cn sh sh liuzy nginx nginx'
+echo '##### => 生成nginx证书请求 cn sh sh liuzy nginx *.liuzy.com'
 openssl req -new -key nginx.pem -out nginx.csr
 
 echo '签发nginx证书'

@@ -29,7 +29,7 @@ public class Util {
 
 				Certificate cer = ks.getCertificate(alias);
 				if (cer != null) {
-					Util.log(tag, "\nAlias: " + alias);
+					Util.log(tag, "Alias: " + alias);
 					byte[] cerb = cer.getEncoded();
 					byte[] pkb = cer.getPublicKey().getEncoded();
 					Util.log(tag, "Cer bytes:" + cerb.length);
@@ -42,7 +42,7 @@ public class Util {
 				if (pwd != null) {
 					Key k = ks.getKey(alias, pwd.toCharArray());
 					if (k != null) {
-						Util.log(tag, "\nAlias: " + alias);
+						Util.log(tag, "Alias: " + alias);
 						Util.log(tag, "Key Algorithm:" + k.getAlgorithm());
 						Util.log(tag, "Key bytes:" + k.getEncoded().length);
 						// Util.log(tag, new String(Base64.encode(k.getEncoded(), Base64.DEFAULT)));
