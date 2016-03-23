@@ -11,7 +11,7 @@ public class HttpsTest {
 		String clientCrt = testDir + "client.crt";
 		String clientPem = testDir + "client.pem";
 		String keyStorePwd = "123456";
-		String serverCrt = testDir + "nginx.crt";
+		String serverCrt = testDir + "tomcat.crt";
 		
 		KeyStore keyStore = KsManager.getKeyStoreByCrtPem(clientCrt, clientPem, keyStorePwd);
 		KeyStore trustStore = KsManager.getTrustStoreByCrt(serverCrt);
