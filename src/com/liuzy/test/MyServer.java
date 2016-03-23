@@ -23,7 +23,7 @@ public class MyServer {
 	public static void signAll() throws Exception {
 		CACenter CA = new CACenter("CN=CA,OU=CA,O=liuzy,L=shanghai,ST=shanghai,C=cn");
 		CA.init();
-		CA.saveCert2Ks("ca", "123456", testDir + "tomcat_trust.jks");
+		CA.saveCert2Jks("ca", "123456", testDir + "tomcat_trust.jks");
 		CA.saveCert(testDir + "ca.crt");
 		CA.saveRsaKey(testDir + "ca.pem");
 
@@ -35,7 +35,7 @@ public class MyServer {
 		Subject tomcat = new Subject("CN=*.liuzy.com,OU=tomcat,O=liuzy,L=shanghai,ST=shanghai,C=cn");
 		tomcat.setCert(CA.sign(tomcat.getPublicKey(), tomcat.getSubjectDN()));
 		tomcat.saveCert(testDir + "tomcat.crt");
-		tomcat.saveKey2Ks("tomcat", "123456", "123456", testDir + "tomcat.jks");
+		tomcat.saveKey2Jks("tomcat", "123456", "123456", testDir + "tomcat.jks");
 
 		Subject client = new Subject("CN=client1,OU=client,O=liuzy,L=shanghai,ST=shanghai,C=cn");
 		client.setCert(CA.sign(client.getPublicKey(), client.getSubjectDN()));

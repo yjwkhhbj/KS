@@ -25,7 +25,7 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
 import com.liuzy.utils.CertUtils;
-import com.liuzy.utils.KeyStoreUtils;
+import com.liuzy.utils.KsUtils;
 import com.liuzy.utils.KeyUtils;
 
 /**
@@ -170,9 +170,14 @@ public class CACenter {
 		KeyUtils.write2PKCS8Key(privateKey, path);
 	}
 
-	/** 保存证书到KeyStore文件 */
-	public void saveCert2Ks(String alias, String ksPwd, String path) {
-		KeyStoreUtils.writeJks(cacert, alias, ksPwd, path);
+	/** 保存证书到JavaKeyStore文件 */
+	public void saveCert2Jks(String alias, String ksPwd, String path) {
+		KsUtils.writeJks(cacert, alias, ksPwd, path);
+	}
+	
+	/** 保存证书到BcKeyStore文件 */
+	public void saveCert2Bks(String alias, String ksPwd, String path) {
+		KsUtils.writeBks(cacert, alias, ksPwd, path);
 	}
 
 	public X509Certificate getCacert() {

@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.liuzy.utils.CertUtils;
-import com.liuzy.utils.KeyStoreUtils;
+import com.liuzy.utils.KsUtils;
 import com.liuzy.utils.KeyUtils;
 
 /**
@@ -51,14 +51,24 @@ public class Subject {
 		KeyUtils.write2PKCS8Key(privateKey, path);
 	}
 
-	/** 保存证书到KeyStore文件 */
-	public void saveCert2Ks(String alias, String ksPwd, String path) {
-		KeyStoreUtils.writeJks(cert, alias, ksPwd, path);
+	/** 保存证书到JavaKeyStore文件 */
+	public void saveCert2Jks(String alias, String ksPwd, String path) {
+		KsUtils.writeJks(cert, alias, ksPwd, path);
+	}
+	
+	/** 保存证书到BcKeyStore文件 */
+	public void saveCert2Bks(String alias, String ksPwd, String path) {
+		KsUtils.writeBks(cert, alias, ksPwd, path);
 	}
 
-	/** 保存证书和私钥到KeyStore文件 */
-	public void saveKey2Ks(String alias, String keyPwd, String ksPwd, String path) {
-		KeyStoreUtils.writeJks(cert, alias, privateKey, keyPwd, ksPwd, path);
+	/** 保存证书和私钥到JavaKeyStore文件 */
+	public void saveKey2Jks(String alias, String keyPwd, String ksPwd, String path) {
+		KsUtils.writeJks(cert, alias, privateKey, keyPwd, ksPwd, path);
+	}
+	
+	/** 保存证书和私钥到BcKeyStore文件 */
+	public void saveKey2Bks(String alias, String keyPwd, String ksPwd, String path) {
+		KsUtils.writeBks(cert, alias, privateKey, keyPwd, ksPwd, path);
 	}
 
 	public String getSubjectDN() {

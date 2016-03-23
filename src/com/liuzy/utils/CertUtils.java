@@ -4,14 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
 /**
  * 证书
+ * 
  * @author liuzy
  * @version 2016-3-20
  */
@@ -19,9 +20,13 @@ public class CertUtils {
 
 	/**
 	 * 证书写入文件
-	 * <pre>-----BEGIN CERTIFICATE-----
+	 * 
+	 * <pre>
+	 * -----BEGIN CERTIFICATE-----
 	 * xxx
-	 * -----END CERTIFICATE-----</pre>
+	 * -----END CERTIFICATE-----
+	 * </pre>
+	 * 
 	 * @param chain
 	 * @param path
 	 */
@@ -52,6 +57,7 @@ public class CertUtils {
 
 	/**
 	 * 读证书文件
+	 * 
 	 * @param cerFile
 	 * @return
 	 */
@@ -78,26 +84,16 @@ public class CertUtils {
 
 	/**
 	 * 打印X509证书信息
+	 * 
 	 * @param cer
 	 */
 	public static void print(X509Certificate cert) {
-		System.out.println("输出证书信息:\n" + cert.toString());
-		System.out.println("版本号:" + cert.getVersion());
-		System.out.println("序列号:" + cert.getSerialNumber().toString(16));
-		System.out.println("主体名：" + cert.getSubjectDN());
-		System.out.println("签发者：" + cert.getIssuerDN());
-		System.out.println("有效期：" + cert.getNotBefore());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		System.out.println("版本号:" + cert.getVersion() + "\t序列号:" + cert.getSerialNumber().toString(16));
+		System.out.println("使用者：" + cert.getSubjectDN());
+		System.out.println("颁发者：" + cert.getIssuerDN());
+		System.out.println("有效期：" + sdf.format(cert.getNotBefore()) + " —— " + sdf.format(cert.getNotAfter()));
 		System.out.println("签名算法：" + cert.getSigAlgName());
-		byte[] sig = cert.getSignature();// 签名值
-		PublicKey pk = cert.getPublicKey();
-		byte[] pkenc = pk.getEncoded();
-		System.out.println("签名 ：");
-		for (int i = 0; i < sig.length; i++)
-			System.out.print(sig[i] + ",");
-		System.out.println();
-		System.out.println("公钥： ");
-		for (int i = 0; i < pkenc.length; i++)
-			System.out.print(pkenc[i] + ",");
 		System.out.println();
 	}
 }
