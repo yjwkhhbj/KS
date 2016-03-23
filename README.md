@@ -32,6 +32,7 @@ CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 ```
 
 - 执行nodejs.sh
+
 ```
 安装了NodeJS、项目生成器、后台运行器
 ```
