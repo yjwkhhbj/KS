@@ -183,4 +183,12 @@ public class CACenter {
 		return privateKey;
 	}
 
+	public String getIssuerDN() {
+		return issuerDN;
+	}
+
+	public String getSignatureAlgorithm() {
+		return signatureAlgorithm;
+	}
+
 }
