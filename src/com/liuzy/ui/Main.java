@@ -51,20 +51,57 @@ public class Main {
 	private static Text text_17;
 	private static Text tcaE;
 	private static Text text;
+	private static Button button;
+	private static TabFolder tabFolder;
+	private static TabFolder tabFolder_1;
+	private static TabItem tabFormFile;
+	private static TabItem tabByHand;
+	private static TabItem tabStart;
+	private static Text txtSs;
+	private static Text text_1;
+	private static Text txtServer;
+	private static Text text_12;
+	private static Text text_13;
+	private static Text text_15;
+	private static Text txtClient;
+	private static Text text_16;
+	private static Text text_2;
 
 	public static void main(String[] args) {
 		display = Display.getDefault();
 
 		shell = new Shell(display, SWT.CLOSE | SWT.MIN);
 		shell.setModified(true);
-		shell.setText("JAVA证书签发工具");
+		shell.setText("JAVA证书签发和证书库转换工具 —— liuzy制作 QQ416657468");
 		shell.setSize(600, 400);
 		shell.setLocation(display.getClientArea().width / 2 - shell.getShell().getSize().x / 2, display.getClientArea().height / 2 - shell.getSize().y / 2);
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		final TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
+		tabFolder = new TabFolder(shell, SWT.NONE);
+		tabFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				switch(tabFolder.getSelectionIndex()) {
+				case 0:
+					CA = null;
+					if (button != null) {
+						button.setEnabled(true);
+						tabStart.setText(" 开 始 ");
+					}
+					break;
+				case 1:
+				case 2:
+					if (CA == null) {
+						tabFolder.setSelection(0);
+					}
+					break;
+				case 3:
+					break;
+				}
+			}
+		});
 
-		TabItem tabStart = new TabItem(tabFolder, SWT.NONE);
+		tabStart = new TabItem(tabFolder, SWT.NONE);
 		tabStart.setText(" 开 始 ");
 
 		Composite compositeStart = new Composite(tabFolder, SWT.NONE);
@@ -74,10 +111,10 @@ public class Main {
 		lblca.setBounds(44, 27, 164, 17);
 		lblca.setText("创建CA中心，请选择：");
 
-		final TabFolder tabFolder_1 = new TabFolder(compositeStart, SWT.NONE);
+		tabFolder_1 = new TabFolder(compositeStart, SWT.NONE);
 		tabFolder_1.setBounds(44, 61, 500, 198);
 
-		final TabItem tabFormFile = new TabItem(tabFolder_1, SWT.NONE);
+		tabFormFile = new TabItem(tabFolder_1, SWT.NONE);
 		tabFormFile.setText(" 来自文件 ");
 
 		Composite compositeFormFile = new Composite(tabFolder_1, SWT.NONE);
@@ -129,8 +166,8 @@ public class Main {
 		button_2.setText("选择...");
 		button_2.setBounds(326, 92, 80, 27);
 
-		final TabItem tabByHand = new TabItem(tabFolder_1, SWT.NONE);
-		tabByHand.setText(" 手动创建 ");
+		tabByHand = new TabItem(tabFolder_1, SWT.NONE);
+		tabByHand.setText(" 自定义 ");
 
 		Composite compositeByHand = new Composite(tabFolder_1, SWT.NONE);
 		tabByHand.setControl(compositeByHand);
@@ -173,10 +210,11 @@ public class Main {
 		combo_1.setBounds(106, 130, 73, 25);
 		combo_1.select(2);
 
-		Button button = new Button(compositeStart, SWT.NONE);
+		button = new Button(compositeStart, SWT.NONE);
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				button.setEnabled(false);
 				try {
 					if (tabFolder_1.getSelectionIndex() == 0) {
 						String caCertFile = textCaCertFile.getText();
@@ -190,29 +228,12 @@ public class Main {
 						CA.init();
 					}
 					if (CA != null) {
+						tabStart.setText(" 重新开始 ");
 						// 切换到CA中心
 						tabFolder.setSelection(1);
-						String dn = CA.getIssuerDN();
-						for (String kvs : dn.split(",")) {
-							String[] kv = kvs.split("=");
-							String k = kv[0].trim();
-							String v = kv[1].trim();
-							switch (k) {
-							case "CN":tcaCN.setText(v);break;
-							case "OU":tcaOU.setText(v);break;
-							case "O":tcaO.setText(v);break;
-							case "L":tcaL.setText(v);break;
-							case "ST":tcaST.setText(v);break;
-							case "C":tcaC.setText(v);break;
-							case "E":tcaE.setText(v);break;
-							default:break;
-							}
-						}
-						tcaSF.setText(CA.getSignatureAlgorithm());
-						tcaXH.setText("0" + CA.getCacert().getSerialNumber().intValue());
-						String begin = sdf.format(CA.getCacert().getNotBefore());
-						String end = sdf.format(CA.getCacert().getNotAfter());
-						tcaSJ.setText(begin + "~" + end);
+						reloadCA();
+					} else {
+						button.setEnabled(true);
 					}
 				} catch (Exception e2) {
 					System.out.println("初始化CA异常");
@@ -270,7 +291,7 @@ public class Main {
 				System.out.println("11111111111111111111111");
 				show(shell, "sdfsdfs");
 				System.out.println("222222222222222");
-				CA.saveCert2Ks("ca", caCertKsPwd, outDir + "ca_cert.jks");
+				CA.saveCert2Jks("ca", caCertKsPwd, outDir + "ca_cert.jks");
 			}
 		});
 		btnCaSaveCert2Ks.setText("保存JKS证书");
@@ -283,7 +304,7 @@ public class Main {
 				CA.saveRsaKey(outDir + "ca.pem");
 				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
 				CA.saveCert(outDir + "ca.crt");
-				CA.saveCert2Ks("ca", "123456", outDir + "ca_cert.jks");
+				CA.saveCert2Jks("ca", "123456", outDir + "ca_cert.jks");
 			}
 		});
 		btnCaSaveAll.setText("保存所有");
@@ -382,7 +403,7 @@ public class Main {
 		btnOpenCsr.setBounds(363, 20, 136, 27);
 
 		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
-		tabItem.setText(" 手 动 签 发 ");
+		tabItem.setText(" 证书签发 ");
 
 		Composite composite_1 = new Composite(tabFolder, SWT.NONE);
 		tabItem.setControl(composite_1);
@@ -460,9 +481,129 @@ public class Main {
 		Label label_11 = new Label(group_1, SWT.RIGHT);
 		label_11.setText("E");
 		label_11.setBounds(19, 210, 28, 17);
+		
+		TabItem tbKsConvert = new TabItem(tabFolder, SWT.NONE);
+		tbKsConvert.setText("生成证书/密钥库");
+		
+		Composite composite_4 = new Composite(tabFolder, SWT.NONE);
+		tbKsConvert.setControl(composite_4);
+		
+		Group group_2 = new Group(composite_4, SWT.NONE);
+		group_2.setText("生成证书库");
+		group_2.setBounds(10, 10, 566, 145);
+		
+		text_1 = new Text(group_2, SWT.BORDER | SWT.READ_ONLY);
+		text_1.setBounds(66, 26, 154, 23);
+		
+		txtServer = new Text(group_2, SWT.BORDER);
+		txtServer.setText("server");
+		txtServer.setBounds(66, 55, 154, 23);
+		
+		Label label_12 = new Label(group_2, SWT.RIGHT);
+		label_12.setBounds(10, 29, 50, 17);
+		label_12.setText("证书文件");
+		
+		Button button_5 = new Button(group_2, SWT.NONE);
+		button_5.setBounds(226, 24, 36, 27);
+		button_5.setText("打开");
+		
+		Label label_14 = new Label(group_2, SWT.RIGHT);
+		label_14.setText("设置别名");
+		label_14.setBounds(10, 58, 50, 17);
+		
+		Label label_13 = new Label(group_2, SWT.RIGHT);
+		label_13.setText("库密码");
+		label_13.setBounds(10, 87, 50, 17);
+		
+		text_2 = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
+		text_2.setText("123456");
+		text_2.setBounds(66, 84, 154, 23);
+		
+		Button btnjks = new Button(group_2, SWT.NONE);
+		btnjks.setText("保存JKS");
+		btnjks.setBounds(347, 30, 108, 27);
+		
+		Button btnbks = new Button(group_2, SWT.NONE);
+		btnbks.setText("保存BKS");
+		btnbks.setBounds(347, 87, 108, 27);
+		
+		Group group_3 = new Group(composite_4, SWT.NONE);
+		group_3.setText("生成密钥库");
+		group_3.setBounds(10, 161, 566, 171);
+		
+		Label label_16 = new Label(group_3, SWT.RIGHT);
+		label_16.setText("证书文件");
+		label_16.setBounds(10, 27, 50, 17);
+		
+		text_12 = new Text(group_3, SWT.BORDER | SWT.READ_ONLY);
+		text_12.setBounds(66, 24, 154, 23);
+		
+		Button button_7 = new Button(group_3, SWT.NONE);
+		button_7.setText("打开");
+		button_7.setBounds(226, 22, 36, 27);
+		
+		Label label_17 = new Label(group_3, SWT.RIGHT);
+		label_17.setText("密钥文件");
+		label_17.setBounds(10, 54, 50, 17);
+		
+		text_13 = new Text(group_3, SWT.BORDER | SWT.READ_ONLY);
+		text_13.setBounds(66, 52, 154, 23);
+		
+		Button button_8 = new Button(group_3, SWT.NONE);
+		button_8.setText("打开");
+		button_8.setBounds(226, 50, 36, 27);
+		
+		Label label_19 = new Label(group_3, SWT.RIGHT);
+		label_19.setText("密钥密码");
+		label_19.setBounds(10, 113, 50, 17);
+		
+		text_15 = new Text(group_3, SWT.BORDER | SWT.PASSWORD);
+		text_15.setText("123456");
+		text_15.setBounds(66, 110, 154, 23);
+		
+		txtClient = new Text(group_3, SWT.BORDER);
+		txtClient.setText("client");
+		txtClient.setBounds(66, 81, 154, 23);
+		
+		Label label_18 = new Label(group_3, SWT.RIGHT);
+		label_18.setText("设置别名");
+		label_18.setBounds(10, 84, 50, 17);
+		
+		Label label_20 = new Label(group_3, SWT.RIGHT);
+		label_20.setText("库密码");
+		label_20.setBounds(10, 142, 50, 17);
+		
+		text_16 = new Text(group_3, SWT.BORDER | SWT.PASSWORD);
+		text_16.setText("123456");
+		text_16.setBounds(66, 139, 154, 23);
+		
+		Button button_6 = new Button(group_3, SWT.NONE);
+		button_6.setText("保存JKS");
+		button_6.setBounds(347, 22, 108, 27);
+		
+		Button button_9 = new Button(group_3, SWT.NONE);
+		button_9.setText("保存BKS");
+		button_9.setBounds(347, 71, 108, 27);
+		
+		Button btnp = new Button(group_3, SWT.NONE);
+		btnp.setText("保存P12");
+		btnp.setBounds(347, 120, 108, 27);
+		
+		TabItem tbCreateKs = new TabItem(tabFolder, SWT.NONE);
+		tbCreateKs.setText(" 证书/密钥库转换");
+		
+		Composite composite_3 = new Composite(tabFolder, SWT.NONE);
+		tbCreateKs.setControl(composite_3);
 
 		TabItem tabSet = new TabItem(tabFolder, SWT.NONE);
-		tabSet.setText(" 工 具 ");
+		tabSet.setText(" 打 开 ");
+		
+		Composite composite_2 = new Composite(tabFolder, SWT.NONE);
+		tabSet.setControl(composite_2);
+		composite_2.setLayout(new FillLayout(SWT.HORIZONTAL));
+		
+		txtSs = new Text(composite_2, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		txtSs.setText("-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAzWP/Gpm8Tl15IkaizjM67XzKE/QTKhACirEwaN8zIpV7+uBJ\r\nMNp4Ff37AFotPjAQ9pvhcExtwyCF8SoqmsAPuVuo6U2JZ3zsFQmZ1ahejF8Xgz7h\r\nQ0zNgZaA73zotZCMcp/+TFA64EhY26Zrd7doF2SFdJ/VuoISAHFAHXVgsW7rzb5I\r\nDXYV/ntfqUjPFmGiOCWr7FsQiu2SYj4r1/U8q01o0vcnEdQxcmhQs/aILJTBrsJu\r\nQ5139iXzH2AgRxu1AhEer5Bn3dowkrLMjxB4ppmOihvvInBXg107gLg8r5ubbbJy\r\nZy4JwEOimRi1z9zayrg8RKgXo33HFr+1S3rnPwIDAQABAoIBAQC7fUnVTXthCeDX\r\nEiXyFz/2pNCPEGIiJoU7d+4Z/Y3fRxfq9qy5ZOT0Jmnnc2oTd6s0gy1y5sHXuquq\r\nb3R+2U5BRVPWzQneJ2IW/jGooU7V0sRS8aaOWeDLJ8lBVQPVIkOjKzvnC+IC9Ofw\r\ncmVt3kWt/Pv6byGaZLvsHXWKrqh6roPtGUvtXHzyGOLB1k+XMqShml3SHTRmli/c\r\n7scH400VQWsy+EsjIk13PnMxHUQoy+58C/ot2VLNUPAOkxWaaGSxK2gACjq4Izwb\r\nlab+w/vkpbf5BNFp0Xsf+TsxAc5UvIcmdtN7BEz2a0B2w/wJZlIWiZOAwCkO8jH3\r\nPAfj81w5AoGBAPY1c7IEdhXX6wW4tMQ5f6L9nsAPzLceB+phOnKhTwi+T2XuYaSl\r\nyX1ODUXJgV59BpFAsIkfQHTfEz4Ukpm3/cBQdk11ne4mxR4ilrasi0GJgvmB4ZJk\r\nqBNkw+Msx5VI/7t2Bh47OSxgMymwasU/JVAQDCZfRb1/ZCmT8q6nTTN7AoGBANWO\r\n/edU9RZjCZoCIqXAwUVTBEBgfrGpjBZms5NBLKzX8OKdFxcT6khEQuXX2rBPzyHx\r\n9J2+xjMEo7426WQC6kAesVD6eCTrAo0Ctt5K6zgCcZEoBvfFqjjx2bYVPwvj1rfJ\r\nS714J/35mWfQSmlvzfQ5Px3rBFk/CCyBYD2s7r4NAoGBAM8mQeVxY3kVZaQ2t8Cx\r\nL/aOtNabdH5NQhOtImP33Gta06rLWlQROOm4leo1lCdPwgrMBrwYEz9BwQrmfEHh\r\nUBpSmHarkukgrZChQXUIz1GgxRXwdT2aet92VGn67yFnfeLXdmZRJdV0Sxe0WuEC\r\nM/6cwdw3JJI/cKKa3ACeupGpAoGAUTHFfS+C41kSLHjFXYm0sbvHcQZ/BOM2fMnd\r\nWo48Axcy4aXiQoby2zkAykxQPBqL4RcR7uu6hWktLEPKZpjpISnKNsST601iseQn\r\nTMrlNW1QamTyiT+g4XeqU50uVEHyv/uLjWTip6A/YAYEVKQKhOFDCwfwplHdtLYX\r\ntjtKpf0CgYEA5VfMwfWtl8XtoVTxyYRahW/Ar3puKCmsyQMvkKIXjh8VhXI4rbkH\r\nAvYaB80GyVuqwbvf7oxXb3hB/NCn9db/zwFDz2sUClsCj/37dnzzMznA9Nrrwmkt\r\n/AEJZV/p0PgYsnqL9jPJ2e1w8X9gsXu6VEjP6iN/KLWCBIiPArfU2fU=\r\n-----END RSA PRIVATE KEY-----\r\n");
 
 		File out = new File(outDir);
 		if (!out.isDirectory()) {
@@ -476,6 +617,29 @@ public class Main {
 				display.sleep();
 			}
 		}
+	}
+	static void reloadCA() {
+		String dn = CA.getIssuerDN();
+		for (String kvs : dn.split(",")) {
+			String[] kv = kvs.split("=");
+			String k = kv[0].trim();
+			String v = kv[1].trim();
+			switch (k) {
+			case "CN":tcaCN.setText(v);break;
+			case "OU":tcaOU.setText(v);break;
+			case "O":tcaO.setText(v);break;
+			case "L":tcaL.setText(v);break;
+			case "ST":tcaST.setText(v);break;
+			case "C":tcaC.setText(v);break;
+			case "E":tcaE.setText(v);break;
+			default:break;
+			}
+		}
+		tcaSF.setText(CA.getSignatureAlgorithm());
+		tcaXH.setText("0" + CA.getCacert().getSerialNumber().intValue());
+		String begin = sdf.format(CA.getCacert().getNotBefore());
+		String end = sdf.format(CA.getCacert().getNotAfter());
+		tcaSJ.setText(begin + "~" + end);
 	}
 	static void show(Shell shell, String msg) {
 		final Shell dialog = new Shell(shell, SWT.PRIMARY_MODAL);
