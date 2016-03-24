@@ -1,9 +1,12 @@
 package com.liuzy.ui;
 
 import java.io.File;
+import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,8 +26,11 @@ import org.eclipse.swt.widgets.Text;
 
 import com.liuzy.ca.CACenter;
 import com.liuzy.ca.Subject;
+import com.liuzy.http.KsManager;
 import com.liuzy.utils.CertUtils;
+import com.liuzy.utils.KeyUtils;
 import com.liuzy.utils.KsUtils;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class Main {
 	static CACenter CA = null;
@@ -37,25 +43,23 @@ public class Main {
 	private static Text textCaCertFile;
 	private static Text textCaPemFile;
 	private static Text txtDN;
-	private static Text text_3;
 	private static Text tcaSF;
 	private static Text tcaSJ;
 	private static Text tcaXH;
-	private static Text text_6;
-	private static Text text_7;
-	private static Text text_8;
-	private static Text text_9;
-	private static Text text_10;
-	private static Text text_11;
+	private static Text txtSubjectCN;
+	private static Text txtSubjectOU;
+	private static Text txtSubjectO;
+	private static Text txtSubjectL;
+	private static Text txtSubjectST;
+	private static Text txtSubjectC;
 	private static Text tcaC;
 	private static Text tcaST;
 	private static Text tcaL;
 	private static Text tcaO;
 	private static Text tcaOU;
 	private static Text tcaCN;
-	private static Text text_17;
 	private static Text tcaE;
-	private static Text text;
+	private static Text txtSubjectE;
 	private static Button button;
 	private static TabFolder tabFolder;
 	private static TabFolder tabFolder_1;
@@ -75,14 +79,19 @@ public class Main {
 	private static Button btnCaSignNginx;
 	private static Button btnCaSignTomcat;
 	private static Button btnCaSignApache;
-	private static Button btnjks;
+	private static Button btnCertOutJks;
+	private static Button btnCertOutBks;
+	private static Button btnKeyOutJks;
+	private static Button btnKeyOutBks;
+	private static Button btnKeyOutP12;
 
 	public static void main(String[] args) {
+		Security.addProvider(new BouncyCastleProvider());
 		display = Display.getDefault();
 
 		shell = new Shell(display, SWT.CLOSE | SWT.MIN);
 		shell.setModified(true);
-		shell.setText("JAVA证书签发和证书库转换工具 —— liuzy制作 QQ416657468");
+		shell.setText("JAVA证书签发和证书库转换工具 —— Liuzy制作 QQ416657468");
 		shell.setSize(600, 400);
 		shell.setLocation(display.getClientArea().width / 2 - shell.getShell().getSize().x / 2, display.getClientArea().height / 2 - shell.getSize().y / 2);
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
@@ -203,10 +212,6 @@ public class Main {
 		btnNewButton.setBounds(402, 10, 51, 27);
 		btnNewButton.setText("...");
 
-		text_3 = new Text(compositeByHand, SWT.BORDER);
-		text_3.setText("2048");
-		text_3.setBounds(106, 93, 73, 23);
-
 		Label label_1 = new Label(compositeByHand, SWT.NONE);
 		label_1.setBounds(39, 96, 61, 17);
 		label_1.setText("密钥长度");
@@ -219,6 +224,11 @@ public class Main {
 		combo_1.setItems(new String[] { "1年", "5年", "10年", "20年" });
 		combo_1.setBounds(106, 130, 73, 25);
 		combo_1.select(2);
+		
+		Combo combo_3 = new Combo(compositeByHand, SWT.NONE);
+		combo_3.setItems(new String[] {"1024", "2048", "4096"});
+		combo_3.setBounds(106, 93, 73, 25);
+		combo_3.select(1);
 
 		button = new Button(compositeStart, SWT.NONE);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -229,7 +239,7 @@ public class Main {
 					if (tabFolder_1.getSelectionIndex() == 0) {
 						String caCertFile = textCaCertFile.getText();
 						String caPemFile = textCaPemFile.getText();
-						if (caCertFile.length() > 3 && caPemFile.length() > 3) {
+						if (!isEmpty(caCertFile) && ! isEmpty(caCertFile)) {
 							CA = new CACenter();
 							CA.init(caCertFile, caPemFile);
 						}
@@ -247,6 +257,7 @@ public class Main {
 				} catch (Exception e2) {
 					alertMsg("文件或信息错误，初始化CA失败！");
 					button.setEnabled(true);
+					e2.printStackTrace();
 				}
 			}
 		});
@@ -491,12 +502,8 @@ public class Main {
 				tabFolder.setSelection(2);
 			}
 		});
-		button_4.setBounds(363, 53, 108, 27);
+		button_4.setBounds(390, 34, 108, 27);
 		button_4.setText("手动签发");
-
-		Button btnOpenCsr = new Button(group, SWT.NONE);
-		btnOpenCsr.setText("打开证书请求文件");
-		btnOpenCsr.setBounds(363, 20, 136, 27);
 
 		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(" 证书签发 ");
@@ -505,30 +512,33 @@ public class Main {
 		tabItem.setControl(composite_1);
 
 		Button button_3 = new Button(composite_1, SWT.NONE);
-		button_3.setBounds(427, 281, 80, 27);
+		button_3.setBounds(426, 281, 80, 27);
 		button_3.setText(" 签 发 ");
 
 		Group group_1 = new Group(composite_1, SWT.NONE);
-		group_1.setText(" 信 息 ");
+		group_1.setText(" 使用者信息 ");
 		group_1.setBounds(39, 10, 490, 254);
 
-		text_6 = new Text(group_1, SWT.BORDER);
-		text_6.setBounds(53, 33, 136, 23);
+		txtSubjectCN = new Text(group_1, SWT.BORDER);
+		txtSubjectCN.setBounds(53, 33, 136, 23);
 
-		text_7 = new Text(group_1, SWT.BORDER);
-		text_7.setBounds(53, 62, 136, 23);
+		txtSubjectOU = new Text(group_1, SWT.BORDER);
+		txtSubjectOU.setBounds(53, 62, 136, 23);
 
-		text_8 = new Text(group_1, SWT.BORDER);
-		text_8.setBounds(53, 91, 136, 23);
+		txtSubjectO = new Text(group_1, SWT.BORDER);
+		txtSubjectO.setBounds(53, 91, 136, 23);
 
-		text_9 = new Text(group_1, SWT.BORDER);
-		text_9.setBounds(53, 120, 100, 23);
+		txtSubjectL = new Text(group_1, SWT.BORDER);
+		txtSubjectL.setText("shanghai");
+		txtSubjectL.setBounds(53, 120, 100, 23);
 
-		text_10 = new Text(group_1, SWT.BORDER);
-		text_10.setBounds(53, 149, 100, 23);
+		txtSubjectST = new Text(group_1, SWT.BORDER);
+		txtSubjectST.setText("shanghai");
+		txtSubjectST.setBounds(53, 149, 100, 23);
 
-		text_11 = new Text(group_1, SWT.BORDER);
-		text_11.setBounds(53, 178, 73, 23);
+		txtSubjectC = new Text(group_1, SWT.BORDER);
+		txtSubjectC.setText("CN");
+		txtSubjectC.setBounds(53, 178, 51, 23);
 
 		Label lblCn = new Label(group_1, SWT.RIGHT);
 		lblCn.setBounds(19, 36, 28, 17);
@@ -554,14 +564,10 @@ public class Main {
 		lblC.setBounds(19, 181, 28, 17);
 		lblC.setText("C");
 
-		Combo combo_2 = new Combo(group_1, SWT.NONE);
-		combo_2.setBounds(292, 33, 148, 25);
-		combo_2.setItems(new String[] { "SHA1withRSA", "SHA256withRSA" });
-		combo_2.select(0);
-
-		text_17 = new Text(group_1, SWT.BORDER);
-		text_17.setBounds(292, 62, 73, 23);
-		text_17.setText("2048");
+		Combo comboSubjectSF = new Combo(group_1, SWT.NONE);
+		comboSubjectSF.setBounds(292, 33, 148, 25);
+		comboSubjectSF.setItems(new String[] { "SHA1withRSA", "SHA256withRSA" });
+		comboSubjectSF.select(0);
 
 		Label label_9 = new Label(group_1, SWT.NONE);
 		label_9.setBounds(225, 36, 61, 17);
@@ -571,12 +577,21 @@ public class Main {
 		label_10.setBounds(225, 65, 61, 17);
 		label_10.setText("密钥长度");
 
-		text = new Text(group_1, SWT.BORDER);
-		text.setBounds(53, 207, 73, 23);
+		txtSubjectE = new Text(group_1, SWT.BORDER);
+		txtSubjectE.setBounds(53, 207, 136, 23);
 
 		Label label_11 = new Label(group_1, SWT.RIGHT);
 		label_11.setText("E");
 		label_11.setBounds(19, 210, 28, 17);
+		
+		Combo combo_2 = new Combo(group_1, SWT.NONE);
+		combo_2.setItems(new String[] {"1024", "2048", "4096"});
+		combo_2.setBounds(292, 62, 73, 25);
+		combo_2.select(1);
+		
+		Button button_6 = new Button(composite_1, SWT.NONE);
+		button_6.setText("打开证书请求文件");
+		button_6.setBounds(92, 281, 136, 27);
 
 		TabItem tbKsConvert = new TabItem(tabFolder, SWT.NONE);
 		tbKsConvert.setText(" 生成证书/密钥库 ");
@@ -627,11 +642,11 @@ public class Main {
 		text_2.setText("123456");
 		text_2.setBounds(92, 84, 154, 23);
 
-		btnjks = new Button(group_2, SWT.NONE);
-		btnjks.addSelectionListener(new SelectionAdapter() {
+		btnCertOutJks = new Button(group_2, SWT.NONE);
+		btnCertOutJks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				btnjks.setEnabled(false);
+				btnCertOutJks.setEnabled(false);
 				try {
 					String cerFile = txtCerFile.getText();
 					String alias = txtServer.getText();
@@ -647,15 +662,37 @@ public class Main {
 					alertMsg("信息错误，保存失败！");
 					e2.printStackTrace();
 				}
-				btnjks.setEnabled(true);
+				btnCertOutJks.setEnabled(true);
 			}
 		});
-		btnjks.setText("保存JKS");
-		btnjks.setBounds(390, 26, 108, 27);
+		btnCertOutJks.setText("保存JKS");
+		btnCertOutJks.setBounds(390, 26, 108, 27);
 
-		Button btnbks = new Button(group_2, SWT.NONE);
-		btnbks.setText("保存BKS");
-		btnbks.setBounds(390, 89, 108, 27);
+		btnCertOutBks = new Button(group_2, SWT.NONE);
+		btnCertOutBks.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnCertOutBks.setEnabled(false);
+				try {
+					String cerFile = txtCerFile.getText();
+					String alias = txtServer.getText();
+					String ksPwd = text_2.getText();
+					if (!isEmpty(cerFile) && !isEmpty(alias) && !isEmpty(ksPwd)) {
+						X509Certificate cert = CertUtils.read(cerFile);
+						if (cert != null) {
+							KsUtils.writeBks(cert, alias, ksPwd, outDir + "create_cert.bks");
+							alertMsg("已保存到" + outDir + "create_cert.bks");
+						}
+					}
+				} catch (Exception e2) {
+					alertMsg("信息错误，保存失败！");
+					e2.printStackTrace();
+				}
+				btnCertOutBks.setEnabled(true);
+			}
+		});
+		btnCertOutBks.setText("保存BKS");
+		btnCertOutBks.setBounds(390, 89, 108, 27);
 
 		Group group_3 = new Group(composite_4, SWT.NONE);
 		group_3.setText("生成密钥库");
@@ -731,17 +768,104 @@ public class Main {
 		text_16.setText("123456");
 		text_16.setBounds(92, 139, 154, 23);
 
-		Button button_6 = new Button(group_3, SWT.NONE);
-		button_6.setText("保存JKS");
-		button_6.setBounds(390, 27, 108, 27);
+		btnKeyOutJks = new Button(group_3, SWT.NONE);
+		btnKeyOutJks.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnKeyOutJks.setEnabled(false);
+				try {
+					String cerFile = text_12.getText();
+					String pemFile = text_13.getText();
+					String alias = txtClient.getText();
+					String keyPwd = text_15.getText();
+					String ksPwd = text_16.getText();
+					if (!isEmpty(cerFile) && !isEmpty(pemFile) &&  !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
+						X509Certificate cert = CertUtils.read(cerFile);
+						PrivateKey key = KeyUtils.read(pemFile).getPrivate();
+						if (!KsManager.verify(cert.getPublicKey(), key)) {
+							alertMsg("证书和密钥不匹配！");
+						} else {
+							if (cert != null || key == null) {
+								KsUtils.writeJks(cert, alias, key, keyPwd, ksPwd, outDir + "create_key_cert.jks");
+								alertMsg("已保存到" + outDir + "create_key_cert.jks");
+							}
+						}
+					}
+				} catch (Exception e2) {
+					alertMsg("信息错误，保存失败！");
+					e2.printStackTrace();
+				}
+				btnKeyOutJks.setEnabled(true);
+			}
+		});
+		btnKeyOutJks.setText("保存JKS");
+		btnKeyOutJks.setBounds(390, 27, 108, 27);
 
-		Button button_9 = new Button(group_3, SWT.NONE);
-		button_9.setText("保存BKS");
-		button_9.setBounds(390, 76, 108, 27);
+		btnKeyOutBks = new Button(group_3, SWT.NONE);
+		btnKeyOutBks.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnKeyOutBks.setEnabled(false);
+				try {
+					String cerFile = text_12.getText();
+					String pemFile = text_13.getText();
+					String alias = txtClient.getText();
+					String keyPwd = text_15.getText();
+					String ksPwd = text_16.getText();
+					if (!isEmpty(cerFile) && !isEmpty(pemFile) &&  !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
+						X509Certificate cert = CertUtils.read(cerFile);
+						PrivateKey key = KeyUtils.read(pemFile).getPrivate();
+						if (!KsManager.verify(cert.getPublicKey(), key)) {
+							alertMsg("证书和密钥不匹配！");
+						} else {
+							if (cert != null || key == null) {
+								KsUtils.writeBks(cert, alias, key, keyPwd, ksPwd, outDir + "create_key_cert.bks");
+								alertMsg("已保存到" + outDir + "create_key_cert.bks");
+							}
+						}
+					}
+				} catch (Exception e2) {
+					alertMsg("信息错误，保存失败！");
+					e2.printStackTrace();
+				}
+				btnKeyOutBks.setEnabled(true);
+			}
+		});
+		btnKeyOutBks.setText("保存BKS");
+		btnKeyOutBks.setBounds(390, 76, 108, 27);
 
-		Button btnp = new Button(group_3, SWT.NONE);
-		btnp.setText("保存P12");
-		btnp.setBounds(390, 125, 108, 27);
+		btnKeyOutP12 = new Button(group_3, SWT.NONE);
+		btnKeyOutP12.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnKeyOutBks.setEnabled(false);
+				try {
+					String cerFile = text_12.getText();
+					String pemFile = text_13.getText();
+					String alias = txtClient.getText();
+					String keyPwd = text_15.getText();
+					String ksPwd = text_16.getText();
+					if (!isEmpty(cerFile) && !isEmpty(pemFile) &&  !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
+						X509Certificate cert = CertUtils.read(cerFile);
+						PrivateKey key = KeyUtils.read(pemFile).getPrivate();
+						if (!KsManager.verify(cert.getPublicKey(), key)) {
+							alertMsg("证书和密钥不匹配！");
+						} else {
+							if (cert != null || key == null) {
+								KsUtils.writeP12(cert, alias, key, keyPwd, ksPwd, outDir + "create_key_cert.p12");
+								alertMsg("已保存到" + outDir + "create_key_cert.p12");
+							}
+						}
+					}
+				} catch (Exception e2) {
+					alertMsg("信息错误，保存失败！");
+					e2.printStackTrace();
+				}
+				btnKeyOutBks.setEnabled(true);
+			}
+		});
+		btnKeyOutP12.setText("保存P12");
+		btnKeyOutP12.setBounds(390, 125, 108, 27);
 
 		TabItem tbCreateKs = new TabItem(tabFolder, SWT.NONE);
 		tbCreateKs.setText(" 证书/密钥库转换");
@@ -757,6 +881,7 @@ public class Main {
 		composite_2.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		txtSs = new Text(composite_2, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		txtSs.setFont(SWTResourceManager.getFont("Consolas", 10, SWT.NORMAL));
 		txtSs.setText("-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAzWP/Gpm8Tl15IkaizjM67XzKE/QTKhACirEwaN8zIpV7+uBJ\r\nMNp4Ff37AFotPjAQ9pvhcExtwyCF8SoqmsAPuVuo6U2JZ3zsFQmZ1ahejF8Xgz7h\r\nQ0zNgZaA73zotZCMcp/+TFA64EhY26Zrd7doF2SFdJ/VuoISAHFAHXVgsW7rzb5I\r\nDXYV/ntfqUjPFmGiOCWr7FsQiu2SYj4r1/U8q01o0vcnEdQxcmhQs/aILJTBrsJu\r\nQ5139iXzH2AgRxu1AhEer5Bn3dowkrLMjxB4ppmOihvvInBXg107gLg8r5ubbbJy\r\nZy4JwEOimRi1z9zayrg8RKgXo33HFr+1S3rnPwIDAQABAoIBAQC7fUnVTXthCeDX\r\nEiXyFz/2pNCPEGIiJoU7d+4Z/Y3fRxfq9qy5ZOT0Jmnnc2oTd6s0gy1y5sHXuquq\r\nb3R+2U5BRVPWzQneJ2IW/jGooU7V0sRS8aaOWeDLJ8lBVQPVIkOjKzvnC+IC9Ofw\r\ncmVt3kWt/Pv6byGaZLvsHXWKrqh6roPtGUvtXHzyGOLB1k+XMqShml3SHTRmli/c\r\n7scH400VQWsy+EsjIk13PnMxHUQoy+58C/ot2VLNUPAOkxWaaGSxK2gACjq4Izwb\r\nlab+w/vkpbf5BNFp0Xsf+TsxAc5UvIcmdtN7BEz2a0B2w/wJZlIWiZOAwCkO8jH3\r\nPAfj81w5AoGBAPY1c7IEdhXX6wW4tMQ5f6L9nsAPzLceB+phOnKhTwi+T2XuYaSl\r\nyX1ODUXJgV59BpFAsIkfQHTfEz4Ukpm3/cBQdk11ne4mxR4ilrasi0GJgvmB4ZJk\r\nqBNkw+Msx5VI/7t2Bh47OSxgMymwasU/JVAQDCZfRb1/ZCmT8q6nTTN7AoGBANWO\r\n/edU9RZjCZoCIqXAwUVTBEBgfrGpjBZms5NBLKzX8OKdFxcT6khEQuXX2rBPzyHx\r\n9J2+xjMEo7426WQC6kAesVD6eCTrAo0Ctt5K6zgCcZEoBvfFqjjx2bYVPwvj1rfJ\r\nS714J/35mWfQSmlvzfQ5Px3rBFk/CCyBYD2s7r4NAoGBAM8mQeVxY3kVZaQ2t8Cx\r\nL/aOtNabdH5NQhOtImP33Gta06rLWlQROOm4leo1lCdPwgrMBrwYEz9BwQrmfEHh\r\nUBpSmHarkukgrZChQXUIz1GgxRXwdT2aet92VGn67yFnfeLXdmZRJdV0Sxe0WuEC\r\nM/6cwdw3JJI/cKKa3ACeupGpAoGAUTHFfS+C41kSLHjFXYm0sbvHcQZ/BOM2fMnd\r\nWo48Axcy4aXiQoby2zkAykxQPBqL4RcR7uu6hWktLEPKZpjpISnKNsST601iseQn\r\nTMrlNW1QamTyiT+g4XeqU50uVEHyv/uLjWTip6A/YAYEVKQKhOFDCwfwplHdtLYX\r\ntjtKpf0CgYEA5VfMwfWtl8XtoVTxyYRahW/Ar3puKCmsyQMvkKIXjh8VhXI4rbkH\r\nAvYaB80GyVuqwbvf7oxXb3hB/NCn9db/zwFDz2sUClsCj/37dnzzMznA9Nrrwmkt\r\n/AEJZV/p0PgYsnqL9jPJ2e1w8X9gsXu6VEjP6iN/KLWCBIiPArfU2fU=\r\n-----END RSA PRIVATE KEY-----\r\n");
 
 		File out = new File(outDir);
@@ -774,7 +899,14 @@ public class Main {
 	}
 
 	static void reloadCA() {
-		String dn = CA.getIssuerDN();
+		tcaCN.setText("");
+		tcaOU.setText("");
+		tcaO.setText("");
+		tcaL.setText("");
+		tcaST.setText("");
+		tcaC.setText("");
+		tcaE.setText("");
+		String dn = CA.getSubjectDN();
 		for (String kvs : dn.split(",")) {
 			String[] kv = kvs.split("=");
 			String k = kv[0].trim();

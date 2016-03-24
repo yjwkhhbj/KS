@@ -50,7 +50,9 @@ public class KsManager {
 			Certificate[] chain = new Certificate[] { cer };
 
 			// 验证证书、公钥和私钥
-			verify(cer.getPublicKey(), privateKey);
+			if(!verify(cer.getPublicKey(), privateKey)) {
+				throw new RuntimeException("客户端公钥和私钥不匹配");
+			}
 			
 			// 初始化
 			KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -87,20 +89,22 @@ public class KsManager {
 	 * 
 	 * @param publicKey
 	 * @param privateKey
-	 * @throws Exception
 	 */
-	private static void verify(PublicKey publicKey, PrivateKey privateKey) throws Exception {
-		String msg = "测试字符串_test_string";
-		Cipher cipher = Cipher.getInstance("RSA");
-		// 公钥加密
-		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-		byte[] mi = cipher.doFinal(msg.getBytes());
-		// 私钥解密
-		cipher.init(Cipher.DECRYPT_MODE, privateKey);
-		String ming = new String(cipher.doFinal(mi));
-		// 验证
-		if (!msg.equals(ming)) {
-			throw new RuntimeException("客户端公钥和私钥不匹配");
+	public static boolean verify(PublicKey publicKey, PrivateKey privateKey) {
+		try {
+			String msg = "测试字符串_test_string";
+			Cipher cipher = Cipher.getInstance("RSA");
+			// 公钥加密
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+			byte[] mi = cipher.doFinal(msg.getBytes());
+			// 私钥解密
+			cipher.init(Cipher.DECRYPT_MODE, privateKey);
+			String ming = new String(cipher.doFinal(mi));
+			// 验证
+			return msg.equals(ming);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 

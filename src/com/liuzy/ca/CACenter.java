@@ -9,7 +9,9 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -25,8 +27,8 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
 import com.liuzy.utils.CertUtils;
-import com.liuzy.utils.KsUtils;
 import com.liuzy.utils.KeyUtils;
+import com.liuzy.utils.KsUtils;
 
 /**
  * CA证书签发中心
@@ -35,10 +37,10 @@ import com.liuzy.utils.KeyUtils;
  * @version 2016-3-20
  */
 public class CACenter {
-	// 序列号 每签发一次加1
+	// 序列号
 	static int serialNumber = 1;
 	// CA的信息
-	private String issuerDN = "CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn";
+	private String subjectDN = "CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn";
 	// CA的私钥
 	private PrivateKey privateKey;
 	// CA的公钥
@@ -51,12 +53,12 @@ public class CACenter {
 	public CACenter() {
 	}
 
-	public CACenter(String issuerDN) {
-		this.issuerDN = issuerDN;
+	public CACenter(String subjectDN) {
+		this.subjectDN = subjectDN;
 	}
 
 	public CACenter(String CN, String OU, String O, String L, String ST, String C) {
-		issuerDN = String.format("CN=%s,OU=%s,O=%s,L=%s,ST=%s,C=%s", CN, OU, O, L, ST, C);
+		subjectDN = String.format("CN=%s,OU=%s,O=%s,L=%s,ST=%s,C=%s", CN, OU, O, L, ST, C);
 	}
 
 	/**
@@ -74,7 +76,15 @@ public class CACenter {
 		calendar.add(Calendar.YEAR, 10);
 		Date notAfter = calendar.getTime();
 
-		JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(new X500Name(issuerDN), new BigInteger("1"), notBefore, notAfter, new X500Name(issuerDN), publicKey);
+		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+		AuthorityKeyIdentifier auth = extUtils.createAuthorityKeyIdentifier(publicKey);
+		SubjectKeyIdentifier subj = extUtils.createSubjectKeyIdentifier(publicKey);
+
+		JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(new X500Name(subjectDN), new BigInteger("1"), notBefore, notAfter, new X500Name(subjectDN), publicKey);
+		certBuilder.addExtension(Extension.authorityKeyIdentifier, false, auth);
+		certBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
+		certBuilder.addExtension(Extension.subjectKeyIdentifier, false, subj);
+
 		ContentSigner caSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
 		cacert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certBuilder.build(caSigner));
 
@@ -90,9 +100,46 @@ public class CACenter {
 	 */
 	public void init(String cacertFile, String capemFile) throws Exception {
 		cacert = (X509Certificate) CertUtils.read(cacertFile);
-		privateKey = KeyUtils.read(capemFile).getPrivate();
+		subjectDN = cacert.getSubjectDN().toString();
+		if (!isCA(cacert)) {
+			throw new RuntimeException("该证书不是CA证书");
+		}
 		publicKey = cacert.getPublicKey();
-		issuerDN = cacert.getIssuerDN().toString();
+		privateKey = KeyUtils.read(capemFile).getPrivate();
+	}
+
+	/**
+	 * 判断证书是否是CA证书
+	 * 
+	 * @param cert
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean isCA(X509Certificate cert) throws Exception {
+		ASN1InputStream in1 = null;
+		ASN1InputStream in2 = null;
+		try {
+			if (cacert.getSubjectDN().toString().equals(cacert.getIssuerDN().toString())) {
+				return true;
+			}
+			byte[] basicConstraints = cert.getExtensionValue("2.5.29.19");
+			if (basicConstraints == null) {
+				return false;
+			}
+			in1 = new ASN1InputStream(basicConstraints);
+			Object obj = in1.readObject();
+			basicConstraints = ((DEROctetString) obj).getOctets();
+			in2 = new ASN1InputStream(basicConstraints);
+			obj = in2.readObject();
+			return BasicConstraints.getInstance(obj).isCA();
+		} finally {
+			if (in1 != null) {
+				in1.close();
+			}
+			if (in2 != null) {
+				in2.close();
+			}
+		}
 	}
 
 	/**
@@ -129,7 +176,7 @@ public class CACenter {
 		AuthorityKeyIdentifier auth = extUtils.createAuthorityKeyIdentifier(publicKey);
 		SubjectKeyIdentifier subj = extUtils.createSubjectKeyIdentifier(hisPublicKey);
 
-		JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(new X500Name(issuerDN), new BigInteger("" + serialNumber++), notBefore, notAfter, subject, hisPublicKey);
+		JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(new X500Name(subjectDN), new BigInteger("" + serialNumber++), notBefore, notAfter, subject, hisPublicKey);
 		certBuilder.addExtension(Extension.authorityKeyIdentifier, false, auth);
 		certBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
 		certBuilder.addExtension(Extension.subjectKeyIdentifier, false, subj);
@@ -188,8 +235,8 @@ public class CACenter {
 		return privateKey;
 	}
 
-	public String getIssuerDN() {
-		return issuerDN;
+	public String getSubjectDN() {
+		return subjectDN;
 	}
 
 	public String getSignatureAlgorithm() {
