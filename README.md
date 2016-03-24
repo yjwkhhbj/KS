@@ -1,5 +1,4 @@
-第一部分：服务器、客户端双向认证完整示例
----
+# 第一部分：服务器、客户端双向认证完整示例
 
 - 以下测试在VMware虚拟机中的CentOS6.5中完成
 - 用openssl生成CA私钥、公钥、自签证书；
@@ -8,7 +7,7 @@
 - 安装、配置Nginx服务器，一步一步从单向认证到双向认证
 - 安装、配置NodeJS环境，生成Nodejs项目，返回JSON
 
-# 用root登陆执行脚本
+## 用root登陆执行脚本
 
 - 执行clear.sh
 
@@ -33,11 +32,12 @@ CA自签依次输入：cn sh sh liuzy CA CA，然后回车跳过其他输入；
 ```
 
 - 执行nodejs.sh
+
 ```
 安装了NodeJS、项目生成器、后台运行器
 ```
 
-# 使用liuzy或普通用户登陆
+## 使用liuzy或普通用户登陆
 
 - 创建项目
 
@@ -80,7 +80,7 @@ tail -f test.log
 {"name":"liuzy","QQ":"416657468"}
 ```
 
-# 配置Nginx
+## 配置Nginx
 
 - 编辑/etc/nginx/nginx.conf，在http的大括号内的最后加上配置
 
@@ -117,12 +117,12 @@ server {
 
 `nginx -s reload`
 
-# 修改host
+## 修改host
 
 - 修改本机Windows系统的host文件
 
 ```
-(如果你的win8,win10，你先把hosts复制到桌面或项目地方，改好了再拖进来)
+(如果你的win8,win10，你先把hosts复制到桌面或其他地方，改好了再拖进来)
 打开`C:\Windows\System32\drivers\etc`文件夹
 编辑hosts，添加内容：(前面地址是你虚拟机的IP)
 192.168.31.186 liuzy.com
@@ -135,14 +135,14 @@ server {
 打开cmd，输入ping liuzy.com，观察是否转到虚拟机IP
 ```
 
-# 访问项目
+## 访问项目
 
 - 这时，你用浏览器访问`http://liuzy.com`或者`http://www.liuzy.com`，请求会被系统DNS到你的虚拟机
 - 虚拟机中的nginx收到请求，会将你的地址重定向到`https://www.liuzy.com`
 - 然后转发到虚拟机的3000端口，NodeJS项目test会给你返回一个JSON字符串
 - 到此已经完成了单向认证，双向认证请继续
 
-# 双向认证
+## 双向认证
 
 - 打开双向认证
 
@@ -172,15 +172,14 @@ No required SSL certificate was sent
 看，返回了结果！
 ```
 
-第二部分：Java实现证书请求，证书签发、输出等等
----
+# 第二部分：Java实现证书请求，证书签发、输出等等
 
 - 需要导入包
 - bcpkix-jdk15on-1.54.jar
 - bcprov-jdk15on-1.54.jar
 - 运行com.liuzy.test.CaTest类的main方法看效果
 
-# 示例
+## 示例
 
 - 输出me的私钥和pkcs8私钥
 
@@ -203,6 +202,7 @@ CertReqUtils.write(csr, testDir + "me.csr");
 ```
 
 - 初始化证书中心，输CA私钥和CA自签证书，并使用me的公钥和me的信息给他签发证书
+
 ```java
 // CA初始化1
 CACenter caCenter = new CACenter();
@@ -241,8 +241,7 @@ System.out.println(CertUtils.verify(cert));
 ```
 
 
-第三部分：服务器使用Java签发的证书
----
+# 第三部分：服务器使用Java签发的证书
 
 - 运行com.liuzy.test.MyServer类的main方法，输出证书等文件
 
@@ -255,6 +254,7 @@ mkdir ssl
 ```
 
 - root用户修改Nginx配置
+
 ```
 # 把原来的三行用#注释，添加以下
 ssl_certificate /home/liuzy/ssl/nginx.crt;
@@ -272,6 +272,7 @@ nginx -s reload
 [RESUT] {"name":"liuzy","QQ":"416657468"}
 ```
 
+# 第四部分：JAVA证书签发窗口化工具
 
-<全文完>
+<待续>
 

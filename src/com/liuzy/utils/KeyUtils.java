@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 
@@ -198,5 +199,10 @@ public class KeyUtils {
 				e2.printStackTrace();
 			}
 		}
+	}
+	
+	public static void print(Key key) {
+		System.out.println("算法：" + key.getAlgorithm() + "\t格式：" + key.getFormat() + "\t长度：" + key.getEncoded().length);
+		System.out.println();
 	}
 }

@@ -16,15 +16,12 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
-import com.liuzy.util.Util;
-
 /**
  * 双向认证时，生成KeyStore和TrustStore的工具
  *
  * @author liuzy
  */
 public class KsManager {
-	private static String tag = "KeyStoreManager";
 
 	/**
 	 * @param crtFile client.crt文件
@@ -52,7 +49,7 @@ public class KsManager {
 			Certificate cer = cf.generateCertificate(crt);
 			Certificate[] chain = new Certificate[] { cer };
 
-			// 验证公钥和私钥
+			// 验证证书、公钥和私钥
 			verify(cer.getPublicKey(), privateKey);
 			
 			// 初始化
@@ -60,12 +57,9 @@ public class KsManager {
 			keyStore.load(null);
 			keyStore.setKeyEntry("client", privateKey, keyStorePwd.toCharArray(), chain);
 			
-			// 打印KeyStore信息
-			Util.show(keyStore, keyStorePwd);
-			
 			return keyStore;
 		} catch (Exception e) {
-			Util.log(tag, "创建服务器信任的证书仓库失败");
+			System.out.println("创建服务器信任的证书仓库失败");
 			e.printStackTrace();
 		} finally {
 			try {
@@ -97,7 +91,6 @@ public class KsManager {
 	 */
 	private static void verify(PublicKey publicKey, PrivateKey privateKey) throws Exception {
 		String msg = "测试字符串_test_string";
-		Util.log("加密前", msg);
 		Cipher cipher = Cipher.getInstance("RSA");
 		// 公钥加密
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -105,7 +98,6 @@ public class KsManager {
 		// 私钥解密
 		cipher.init(Cipher.DECRYPT_MODE, privateKey);
 		String ming = new String(cipher.doFinal(mi));
-		Util.log("解密后", ming);
 		// 验证
 		if (!msg.equals(ming)) {
 			throw new RuntimeException("客户端公钥和私钥不匹配");
@@ -130,12 +122,9 @@ public class KsManager {
 			// 把服务器证书放入keystore中
 			keyStore.setCertificateEntry("server", cer);
 
-			// 打印KeyStore信息
-			Util.show(keyStore, null);
-
 			return keyStore;
 		} catch (Exception e) {
-			Util.log(tag, "创建客户端信任的服务器证书仓库失败");
+			System.out.println("创建客户端信任的服务器证书仓库失败");
 			e.printStackTrace();
 			return null;
 		} finally {
@@ -160,10 +149,9 @@ public class KsManager {
 			p12In = new FileInputStream(new File(p12File));
 			KeyStore keyStore = KeyStore.getInstance("PKCS12");
 			keyStore.load(p12In, p12Pwd.toCharArray());
-			Util.show(keyStore, p12Pwd);
 			return keyStore;
 		} catch (Exception e) {
-			Util.log(tag, "创建服务器信任的证书仓库失败");
+			System.out.println("创建服务器信任的证书仓库失败");
 			e.printStackTrace();
 			return null;
 		} finally {
@@ -181,16 +169,41 @@ public class KsManager {
 	 * @param jksFile
 	 * @return
 	 */
+	public static KeyStore getKeyStoreByJks(String jksFile, String bksPwd) {
+		InputStream bksIn = null;
+		try {
+			bksIn = new FileInputStream(new File(jksFile));
+			KeyStore keyStore = KeyStore.getInstance("JKS");
+			keyStore.load(bksIn, bksPwd.toCharArray());
+			return keyStore;
+		} catch (Exception e) {
+			System.out.println("创建服务器信任的客户端证书仓库失败");
+			e.printStackTrace();
+			return null;
+		} finally {
+			try {
+				if (bksIn != null) {
+					bksIn.close();
+				}
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * @param jksFile
+	 * @return
+	 */
 	public static KeyStore getTrustStoreByJks(String jksFile, String bksPwd) {
 		InputStream bksIn = null;
 		try {
 			bksIn = new FileInputStream(new File(jksFile));
 			KeyStore keyStore = KeyStore.getInstance("JKS");
 			keyStore.load(bksIn, bksPwd.toCharArray());
-			Util.show(keyStore, bksPwd);
 			return keyStore;
 		} catch (Exception e) {
-			Util.log(tag, "创建客户端信任的服务器证书仓库失败");
+			System.out.println("创建客户端信任的服务器证书仓库失败");
 			e.printStackTrace();
 			return null;
 		} finally {
@@ -212,12 +225,11 @@ public class KsManager {
 		InputStream bksIn = null;
 		try {
 			bksIn = new FileInputStream(new File(bksFile));
-			KeyStore keyStore = KeyStore.getInstance("BKS");
+			KeyStore keyStore = KeyStore.getInstance("BKS", "BC");
 			keyStore.load(bksIn, bksPwd.toCharArray());
-			Util.show(keyStore, bksPwd);
 			return keyStore;
 		} catch (Exception e) {
-			Util.log(tag, "创建客户端信任的服务器证书仓库失败");
+			System.out.println("创建客户端信任的服务器证书仓库失败");
 			e.printStackTrace();
 			return null;
 		} finally {

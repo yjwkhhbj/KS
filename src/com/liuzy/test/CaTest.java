@@ -14,12 +14,13 @@ import com.liuzy.ca.CACenter;
 import com.liuzy.utils.CertReqUtils;
 import com.liuzy.utils.CertUtils;
 import com.liuzy.utils.KeyUtils;
+import com.liuzy.utils.KsUtils;
 
 public class CaTest {
 	private static PublicKey publicKey;
 	private static PrivateKey privateKey;
 	
-	private static String testDir = "E:/";
+	private static String testDir = "D:/";
 
 	public static void main(String[] args) throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
@@ -41,6 +42,9 @@ public class CaTest {
 		
 		// 测试CertUtils
 		testCertUtils();
+		
+		// 测试KsUtils
+		testKsUtils();
 	}
 
 	public static void testKeyUtils() throws Exception {
@@ -69,7 +73,7 @@ public class CaTest {
 		// 签发1 根据公钥和使用者信息
 		String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
 		X509Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
-		CertUtils.write(newcert1, testDir + "me_cert1.cer");
+		CertUtils.write(newcert1, testDir + "me_cert1.crt");
 	}
 
 	public static void testCACenter2() throws Exception {
@@ -80,13 +84,31 @@ public class CaTest {
 		// 签发2 根据证书请求文件
 		PKCS10CertificationRequest csr = CertReqUtils.read(testDir + "me.csr");
 		X509Certificate newcert2 = caCenter.sign(csr);
-		CertUtils.write(newcert2, testDir + "me_cert2.cer");
+		CertUtils.write(newcert2, testDir + "me_cert2.crt");
 	}
 	
 	public static void testCertUtils() throws Exception {
 		// 读证书
-		X509Certificate cert = CertUtils.read(testDir + "me_cert1.cer");
+		X509Certificate cert = CertUtils.read(testDir + "me_cert1.crt");
 		// 查看证书信息
-		CertUtils.print((X509Certificate) cert);
+		CertUtils.print(cert);
+	}
+
+	private static void testKsUtils() throws Exception {
+		// 读
+		PrivateKey key = KeyUtils.read(testDir + "me.pem").getPrivate();
+		X509Certificate cert = CertUtils.read(testDir + "me_cert1.crt");
+		// 设置
+		String alias = "client";
+		String keyPwd = "123456";
+		String ksPwd = "123456";
+		// 保存
+		KsUtils.writeJks(cert, alias, key, keyPwd, ksPwd, testDir + "me.jks");
+		KsUtils.writeBks(cert, alias, key, keyPwd, ksPwd, testDir + "me.bks");
+		KsUtils.writeP12(cert, alias, key, keyPwd, ksPwd, testDir + "me.p12");
+		// 验证
+		KsUtils.print(KsUtils.readJks(testDir + "me.jks", ksPwd), keyPwd);
+		KsUtils.print(KsUtils.readBks(testDir + "me.bks", ksPwd), keyPwd);
+		KsUtils.print(KsUtils.readP12(testDir + "me.p12", ksPwd), keyPwd);
 	}
 }
