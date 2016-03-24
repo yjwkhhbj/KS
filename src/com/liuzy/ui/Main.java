@@ -1,6 +1,7 @@
 package com.liuzy.ui;
 
 import java.io.File;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 
 import org.eclipse.swt.SWT;
@@ -14,19 +15,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.liuzy.ca.CACenter;
+import com.liuzy.ca.Subject;
+import com.liuzy.utils.CertUtils;
+import com.liuzy.utils.KsUtils;
 
 public class Main {
 	static CACenter CA = null;
 	static String outDir = "D:/KS/";
 	static boolean isFormFile = true;
 	static String caCertKsPwd = "123456";
-	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static Display display;
 	private static Shell shell;
 	private static Text textCaCertFile;
@@ -58,7 +63,7 @@ public class Main {
 	private static TabItem tabByHand;
 	private static TabItem tabStart;
 	private static Text txtSs;
-	private static Text text_1;
+	private static Text txtCerFile;
 	private static Text txtServer;
 	private static Text text_12;
 	private static Text text_13;
@@ -66,6 +71,11 @@ public class Main {
 	private static Text txtClient;
 	private static Text text_16;
 	private static Text text_2;
+	private static Button btnCaSignClient;
+	private static Button btnCaSignNginx;
+	private static Button btnCaSignTomcat;
+	private static Button btnCaSignApache;
+	private static Button btnjks;
 
 	public static void main(String[] args) {
 		display = Display.getDefault();
@@ -81,7 +91,7 @@ public class Main {
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				switch(tabFolder.getSelectionIndex()) {
+				switch (tabFolder.getSelectionIndex()) {
 				case 0:
 					CA = null;
 					if (button != null) {
@@ -139,8 +149,8 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
-				fileOpen.setFilterNames(new String[]{"证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)"});
-				fileOpen.setFilterExtensions(new String[]{"*.crt;*.cer;*.pem", "*.*"});
+				fileOpen.setFilterNames(new String[] { "证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)" });
+				fileOpen.setFilterExtensions(new String[] { "*.crt;*.cer;*.pem", "*.*" });
 				String path = fileOpen.open();
 				if (path != null) {
 					textCaCertFile.setText(path);
@@ -155,8 +165,8 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
-				fileOpen.setFilterNames(new String[]{"私钥文件(*.pem;*.key)", "所有文件(*.*)"});
-				fileOpen.setFilterExtensions(new String[]{"*.pem;*.key", "*.*"});
+				fileOpen.setFilterNames(new String[] { "私钥文件(*.pem;*.key)", "所有文件(*.*)" });
+				fileOpen.setFilterExtensions(new String[] { "*.pem;*.key", "*.*" });
 				String path = fileOpen.open();
 				if (path != null) {
 					textCaPemFile.setText(path);
@@ -229,15 +239,14 @@ public class Main {
 					}
 					if (CA != null) {
 						tabStart.setText(" 重新开始 ");
-						// 切换到CA中心
 						tabFolder.setSelection(1);
 						reloadCA();
 					} else {
 						button.setEnabled(true);
 					}
 				} catch (Exception e2) {
-					System.out.println("初始化CA异常");
-					e2.printStackTrace();
+					alertMsg("文件或信息错误，初始化CA失败！");
+					button.setEnabled(true);
 				}
 			}
 		});
@@ -259,9 +268,10 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CA.saveRsaKey(outDir + "ca.pem");
+				alertMsg("已保存到" + outDir + "ca.pem");
 			}
 		});
-		btnCaSaveKey.setBounds(205, 120, 108, 27);
+		btnCaSaveKey.setBounds(205, 166, 108, 27);
 		btnCaSaveKey.setText("保存私钥");
 
 		Button btnCaSavePkcs8Key = new Button(grpCA, SWT.NONE);
@@ -269,33 +279,33 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
+				alertMsg("已保存到" + outDir + "ca_pkcs8.pem");
 			}
 		});
 		btnCaSavePkcs8Key.setText("保存PKCS8私钥");
-		btnCaSavePkcs8Key.setBounds(205, 166, 108, 27);
+		btnCaSavePkcs8Key.setBounds(319, 166, 108, 27);
 
 		Button btnCaSaveCert = new Button(grpCA, SWT.NONE);
 		btnCaSaveCert.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CA.saveCert(outDir + "ca.crt");
+				alertMsg("已保存到" + outDir + "ca.crt");
 			}
 		});
 		btnCaSaveCert.setText("保存证书");
-		btnCaSaveCert.setBounds(319, 120, 108, 27);
+		btnCaSaveCert.setBounds(205, 120, 108, 27);
 
 		Button btnCaSaveCert2Ks = new Button(grpCA, SWT.NONE);
 		btnCaSaveCert2Ks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("11111111111111111111111");
-				show(shell, "sdfsdfs");
-				System.out.println("222222222222222");
 				CA.saveCert2Jks("ca", caCertKsPwd, outDir + "ca_cert.jks");
+				alertMsg("默认密码为123456\r\n已保存到" + outDir + "ca_cert.jks");
 			}
 		});
 		btnCaSaveCert2Ks.setText("保存JKS证书");
-		btnCaSaveCert2Ks.setBounds(319, 166, 108, 27);
+		btnCaSaveCert2Ks.setBounds(319, 120, 108, 27);
 
 		Button btnCaSaveAll = new Button(grpCA, SWT.NONE);
 		btnCaSaveAll.addSelectionListener(new SelectionAdapter() {
@@ -305,16 +315,18 @@ public class Main {
 				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
 				CA.saveCert(outDir + "ca.crt");
 				CA.saveCert2Jks("ca", "123456", outDir + "ca_cert.jks");
+				CA.saveCert2Bks("ca", "123456", outDir + "ca_cert.bks");
+				alertMsg("默认密码为123456\r\n已保存到" + outDir);
 			}
 		});
 		btnCaSaveAll.setText("保存所有");
-		btnCaSaveAll.setBounds(448, 166, 108, 27);
+		btnCaSaveAll.setBounds(433, 166, 108, 27);
 
 		tcaSF = new Text(grpCA, SWT.BORDER | SWT.READ_ONLY | SWT.CENTER);
 		tcaSF.setBounds(205, 21, 204, 23);
 
 		tcaSJ = new Text(grpCA, SWT.BORDER | SWT.READ_ONLY | SWT.CENTER);
-		tcaSJ.setBounds(205, 50, 187, 23);
+		tcaSJ.setBounds(205, 50, 300, 23);
 
 		tcaXH = new Text(grpCA, SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);
 		tcaXH.setBounds(432, 21, 73, 23);
@@ -360,31 +372,115 @@ public class Main {
 		Label label_8 = new Label(grpCA, SWT.RIGHT);
 		label_8.setText("C");
 		label_8.setBounds(10, 169, 28, 17);
-		
+
 		tcaE = new Text(grpCA, SWT.BORDER | SWT.READ_ONLY);
 		tcaE.setBounds(44, 195, 73, 23);
-		
+
 		Label lblE = new Label(grpCA, SWT.RIGHT);
 		lblE.setText("E");
 		lblE.setBounds(10, 198, 28, 17);
+		
+		Button btnbks_1 = new Button(grpCA, SWT.NONE);
+		btnbks_1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CA.saveCert2Jks("ca", caCertKsPwd, outDir + "ca_cert.bks");
+				alertMsg("默认密码为123456\r\n已保存到" + outDir + "ca_cert.bks");
+			}
+		});
+		btnbks_1.setText("保存BKS证书");
+		btnbks_1.setBounds(433, 120, 108, 27);
 
 		Group group = new Group(composite, SWT.NONE);
 		group.setText(" 签 发");
 		group.setBounds(10, 244, 566, 88);
 
-		Button btnCaSignNginx = new Button(group, SWT.NONE);
+		btnCaSignNginx = new Button(group, SWT.NONE);
+		btnCaSignNginx.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnCaSignNginx.setEnabled(false);
+				try {
+					Subject nginx = new Subject("CN=myserver.com,OU=nginx,O=liuzy,L=shanghai,ST=shanghai,C=cn");
+					nginx.setCert(CA.sign(nginx.getPublicKey(), nginx.getSubjectDN()));
+					nginx.saveCert(outDir + "nginx.crt");
+					nginx.saveRsaKey(outDir + "nginx.pem");
+					CA.saveCert(outDir + "nginx_trust.crt");
+					alertMsg("默认密码为123456\r\n已保存到" + outDir);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				btnCaSignNginx.setEnabled(true);
+			}
+		});
 		btnCaSignNginx.setBounds(46, 20, 108, 27);
 		btnCaSignNginx.setText("签发Nginx");
 
-		Button btnCaSignApache = new Button(group, SWT.NONE);
+		btnCaSignApache = new Button(group, SWT.NONE);
+		btnCaSignApache.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnCaSignApache.setEnabled(false);
+				try {
+					Subject apache = new Subject("CN=myserver.com,OU=apache,O=liuzy,L=shanghai,ST=shanghai,C=cn");
+					apache.setCert(CA.sign(apache.getPublicKey(), apache.getSubjectDN()));
+					apache.saveCert(outDir + "apache.crt");
+					apache.saveRsaKey(outDir + "apache.pem");
+					CA.saveCert(outDir + "apache_trust.crt");
+					alertMsg("默认密码为123456\r\n已保存到" + outDir);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				btnCaSignApache.setEnabled(true);
+			}
+		});
 		btnCaSignApache.setBounds(46, 53, 108, 27);
 		btnCaSignApache.setText("签发Apache");
 
-		Button btnCaSignTomcat = new Button(group, SWT.NONE);
+		btnCaSignTomcat = new Button(group, SWT.NONE);
+		btnCaSignTomcat.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnCaSignTomcat.setEnabled(false);
+				try {
+					Subject tomcat = new Subject("CN=myserver.com,OU=tomcat,O=liuzy,L=shanghai,ST=shanghai,C=cn");
+					tomcat.setCert(CA.sign(tomcat.getPublicKey(), tomcat.getSubjectDN()));
+					tomcat.saveKey2Jks("tomcat", "123456", "123456", outDir + "tomcat.jks");
+					CA.saveCert2Jks("server", "123456", outDir + "tomcat_trust.jks");
+					alertMsg("默认密码为123456\r\n已保存到" + outDir);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				btnCaSignTomcat.setEnabled(true);
+			}
+		});
 		btnCaSignTomcat.setBounds(170, 20, 108, 27);
 		btnCaSignTomcat.setText("签发Tomcat");
 
-		Button btnCaSignClient = new Button(group, SWT.NONE);
+		btnCaSignClient = new Button(group, SWT.NONE);
+		btnCaSignClient.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					btnCaSignClient.setEnabled(false);
+					Subject client = new Subject("CN=client,OU=client,O=liuzy,L=shanghai,ST=shanghai,C=cn");
+					client.setCert(CA.sign(client.getPublicKey(), client.getSubjectDN()));
+					client.saveCert(outDir + "client.crt");
+					client.saveRsaKey(outDir + "client.pem");
+					client.savePkcs8Key(outDir + "client_pkcs8.pem");
+					client.saveKey2Jks("client", "123456", "123456", outDir + "client.jks");
+					client.saveKey2Bks("client", "123456", "123456", outDir + "client.bks");
+					client.saveKey2P12("client", "123456", "123456", outDir + "client.p12");
+					CA.saveCert(outDir + "client_trust.crt");
+					CA.saveCert2Jks("server", "123456", outDir + "client_trust.jks");
+					CA.saveCert2Bks("server", "123456", outDir + "client_trust.bks");
+					alertMsg("默认密码为123456\r\n已保存到" + outDir);
+					btnCaSignClient.setEnabled(true);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		});
 		btnCaSignClient.setBounds(170, 51, 108, 27);
 		btnCaSignClient.setText("签发客户端");
 
@@ -474,134 +570,192 @@ public class Main {
 		Label label_10 = new Label(group_1, SWT.NONE);
 		label_10.setBounds(225, 65, 61, 17);
 		label_10.setText("密钥长度");
-		
+
 		text = new Text(group_1, SWT.BORDER);
 		text.setBounds(53, 207, 73, 23);
-		
+
 		Label label_11 = new Label(group_1, SWT.RIGHT);
 		label_11.setText("E");
 		label_11.setBounds(19, 210, 28, 17);
-		
+
 		TabItem tbKsConvert = new TabItem(tabFolder, SWT.NONE);
-		tbKsConvert.setText("生成证书/密钥库");
-		
+		tbKsConvert.setText(" 生成证书/密钥库 ");
+
 		Composite composite_4 = new Composite(tabFolder, SWT.NONE);
 		tbKsConvert.setControl(composite_4);
-		
+
 		Group group_2 = new Group(composite_4, SWT.NONE);
-		group_2.setText("生成证书库");
+		group_2.setText(" 生成证书库 ");
 		group_2.setBounds(10, 10, 566, 145);
-		
-		text_1 = new Text(group_2, SWT.BORDER | SWT.READ_ONLY);
-		text_1.setBounds(66, 26, 154, 23);
-		
+
+		txtCerFile = new Text(group_2, SWT.BORDER | SWT.READ_ONLY);
+		txtCerFile.setBounds(92, 26, 154, 23);
+
 		txtServer = new Text(group_2, SWT.BORDER);
 		txtServer.setText("server");
-		txtServer.setBounds(66, 55, 154, 23);
-		
+		txtServer.setBounds(92, 55, 154, 23);
+
 		Label label_12 = new Label(group_2, SWT.RIGHT);
-		label_12.setBounds(10, 29, 50, 17);
+		label_12.setBounds(36, 29, 50, 17);
 		label_12.setText("证书文件");
-		
+
 		Button button_5 = new Button(group_2, SWT.NONE);
-		button_5.setBounds(226, 24, 36, 27);
+		button_5.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				fileOpen.setFilterNames(new String[] { "证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)" });
+				fileOpen.setFilterExtensions(new String[] { "*.crt;*.cer;*.pem", "*.*" });
+				String path = fileOpen.open();
+				if (path != null) {
+					txtCerFile.setText(path);
+				}
+			}
+		});
+		button_5.setBounds(252, 24, 36, 27);
 		button_5.setText("打开");
-		
+
 		Label label_14 = new Label(group_2, SWT.RIGHT);
 		label_14.setText("设置别名");
-		label_14.setBounds(10, 58, 50, 17);
-		
+		label_14.setBounds(36, 58, 50, 17);
+
 		Label label_13 = new Label(group_2, SWT.RIGHT);
 		label_13.setText("库密码");
-		label_13.setBounds(10, 87, 50, 17);
-		
+		label_13.setBounds(36, 87, 50, 17);
+
 		text_2 = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
 		text_2.setText("123456");
-		text_2.setBounds(66, 84, 154, 23);
-		
-		Button btnjks = new Button(group_2, SWT.NONE);
+		text_2.setBounds(92, 84, 154, 23);
+
+		btnjks = new Button(group_2, SWT.NONE);
+		btnjks.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				btnjks.setEnabled(false);
+				try {
+					String cerFile = txtCerFile.getText();
+					String alias = txtServer.getText();
+					String ksPwd = text_2.getText();
+					if (!isEmpty(cerFile) && !isEmpty(alias) && !isEmpty(ksPwd)) {
+						X509Certificate cert = CertUtils.read(cerFile);
+						if (cert != null) {
+							KsUtils.writeJks(cert, alias, ksPwd, outDir + "create_cert.jks");
+							alertMsg("已保存到" + outDir + "create_cert.jks");
+						}
+					}
+				} catch (Exception e2) {
+					alertMsg("信息错误，保存失败！");
+					e2.printStackTrace();
+				}
+				btnjks.setEnabled(true);
+			}
+		});
 		btnjks.setText("保存JKS");
-		btnjks.setBounds(347, 30, 108, 27);
-		
+		btnjks.setBounds(390, 26, 108, 27);
+
 		Button btnbks = new Button(group_2, SWT.NONE);
 		btnbks.setText("保存BKS");
-		btnbks.setBounds(347, 87, 108, 27);
-		
+		btnbks.setBounds(390, 89, 108, 27);
+
 		Group group_3 = new Group(composite_4, SWT.NONE);
 		group_3.setText("生成密钥库");
 		group_3.setBounds(10, 161, 566, 171);
-		
+
 		Label label_16 = new Label(group_3, SWT.RIGHT);
 		label_16.setText("证书文件");
-		label_16.setBounds(10, 27, 50, 17);
-		
+		label_16.setBounds(36, 27, 50, 17);
+
 		text_12 = new Text(group_3, SWT.BORDER | SWT.READ_ONLY);
-		text_12.setBounds(66, 24, 154, 23);
-		
+		text_12.setBounds(92, 24, 154, 23);
+
 		Button button_7 = new Button(group_3, SWT.NONE);
+		button_7.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				fileOpen.setFilterNames(new String[] { "证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)" });
+				fileOpen.setFilterExtensions(new String[] { "*.crt;*.cer;*.pem", "*.*" });
+				String path = fileOpen.open();
+				if (path != null) {
+					text_12.setText(path);
+				}
+			}
+		});
 		button_7.setText("打开");
-		button_7.setBounds(226, 22, 36, 27);
-		
+		button_7.setBounds(252, 22, 36, 27);
+
 		Label label_17 = new Label(group_3, SWT.RIGHT);
 		label_17.setText("密钥文件");
-		label_17.setBounds(10, 54, 50, 17);
-		
+		label_17.setBounds(36, 54, 50, 17);
+
 		text_13 = new Text(group_3, SWT.BORDER | SWT.READ_ONLY);
-		text_13.setBounds(66, 52, 154, 23);
-		
+		text_13.setBounds(92, 52, 154, 23);
+
 		Button button_8 = new Button(group_3, SWT.NONE);
+		button_8.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				fileOpen.setFilterNames(new String[] { "私钥文件(*.pem;*.key)", "所有文件(*.*)" });
+				fileOpen.setFilterExtensions(new String[] { "*.pem;*.key", "*.*" });
+				String path = fileOpen.open();
+				if (path != null) {
+					text_13.setText(path);
+				}
+			}
+		});
 		button_8.setText("打开");
-		button_8.setBounds(226, 50, 36, 27);
-		
+		button_8.setBounds(252, 50, 36, 27);
+
 		Label label_19 = new Label(group_3, SWT.RIGHT);
 		label_19.setText("密钥密码");
-		label_19.setBounds(10, 113, 50, 17);
-		
+		label_19.setBounds(36, 113, 50, 17);
+
 		text_15 = new Text(group_3, SWT.BORDER | SWT.PASSWORD);
 		text_15.setText("123456");
-		text_15.setBounds(66, 110, 154, 23);
-		
+		text_15.setBounds(92, 110, 154, 23);
+
 		txtClient = new Text(group_3, SWT.BORDER);
 		txtClient.setText("client");
-		txtClient.setBounds(66, 81, 154, 23);
-		
+		txtClient.setBounds(92, 81, 154, 23);
+
 		Label label_18 = new Label(group_3, SWT.RIGHT);
 		label_18.setText("设置别名");
-		label_18.setBounds(10, 84, 50, 17);
-		
+		label_18.setBounds(36, 84, 50, 17);
+
 		Label label_20 = new Label(group_3, SWT.RIGHT);
 		label_20.setText("库密码");
-		label_20.setBounds(10, 142, 50, 17);
-		
+		label_20.setBounds(36, 142, 50, 17);
+
 		text_16 = new Text(group_3, SWT.BORDER | SWT.PASSWORD);
 		text_16.setText("123456");
-		text_16.setBounds(66, 139, 154, 23);
-		
+		text_16.setBounds(92, 139, 154, 23);
+
 		Button button_6 = new Button(group_3, SWT.NONE);
 		button_6.setText("保存JKS");
-		button_6.setBounds(347, 22, 108, 27);
-		
+		button_6.setBounds(390, 27, 108, 27);
+
 		Button button_9 = new Button(group_3, SWT.NONE);
 		button_9.setText("保存BKS");
-		button_9.setBounds(347, 71, 108, 27);
-		
+		button_9.setBounds(390, 76, 108, 27);
+
 		Button btnp = new Button(group_3, SWT.NONE);
 		btnp.setText("保存P12");
-		btnp.setBounds(347, 120, 108, 27);
-		
+		btnp.setBounds(390, 125, 108, 27);
+
 		TabItem tbCreateKs = new TabItem(tabFolder, SWT.NONE);
 		tbCreateKs.setText(" 证书/密钥库转换");
-		
+
 		Composite composite_3 = new Composite(tabFolder, SWT.NONE);
 		tbCreateKs.setControl(composite_3);
 
 		TabItem tabSet = new TabItem(tabFolder, SWT.NONE);
 		tabSet.setText(" 打 开 ");
-		
+
 		Composite composite_2 = new Composite(tabFolder, SWT.NONE);
 		tabSet.setControl(composite_2);
 		composite_2.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
+
 		txtSs = new Text(composite_2, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
 		txtSs.setText("-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAzWP/Gpm8Tl15IkaizjM67XzKE/QTKhACirEwaN8zIpV7+uBJ\r\nMNp4Ff37AFotPjAQ9pvhcExtwyCF8SoqmsAPuVuo6U2JZ3zsFQmZ1ahejF8Xgz7h\r\nQ0zNgZaA73zotZCMcp/+TFA64EhY26Zrd7doF2SFdJ/VuoISAHFAHXVgsW7rzb5I\r\nDXYV/ntfqUjPFmGiOCWr7FsQiu2SYj4r1/U8q01o0vcnEdQxcmhQs/aILJTBrsJu\r\nQ5139iXzH2AgRxu1AhEer5Bn3dowkrLMjxB4ppmOihvvInBXg107gLg8r5ubbbJy\r\nZy4JwEOimRi1z9zayrg8RKgXo33HFr+1S3rnPwIDAQABAoIBAQC7fUnVTXthCeDX\r\nEiXyFz/2pNCPEGIiJoU7d+4Z/Y3fRxfq9qy5ZOT0Jmnnc2oTd6s0gy1y5sHXuquq\r\nb3R+2U5BRVPWzQneJ2IW/jGooU7V0sRS8aaOWeDLJ8lBVQPVIkOjKzvnC+IC9Ofw\r\ncmVt3kWt/Pv6byGaZLvsHXWKrqh6roPtGUvtXHzyGOLB1k+XMqShml3SHTRmli/c\r\n7scH400VQWsy+EsjIk13PnMxHUQoy+58C/ot2VLNUPAOkxWaaGSxK2gACjq4Izwb\r\nlab+w/vkpbf5BNFp0Xsf+TsxAc5UvIcmdtN7BEz2a0B2w/wJZlIWiZOAwCkO8jH3\r\nPAfj81w5AoGBAPY1c7IEdhXX6wW4tMQ5f6L9nsAPzLceB+phOnKhTwi+T2XuYaSl\r\nyX1ODUXJgV59BpFAsIkfQHTfEz4Ukpm3/cBQdk11ne4mxR4ilrasi0GJgvmB4ZJk\r\nqBNkw+Msx5VI/7t2Bh47OSxgMymwasU/JVAQDCZfRb1/ZCmT8q6nTTN7AoGBANWO\r\n/edU9RZjCZoCIqXAwUVTBEBgfrGpjBZms5NBLKzX8OKdFxcT6khEQuXX2rBPzyHx\r\n9J2+xjMEo7426WQC6kAesVD6eCTrAo0Ctt5K6zgCcZEoBvfFqjjx2bYVPwvj1rfJ\r\nS714J/35mWfQSmlvzfQ5Px3rBFk/CCyBYD2s7r4NAoGBAM8mQeVxY3kVZaQ2t8Cx\r\nL/aOtNabdH5NQhOtImP33Gta06rLWlQROOm4leo1lCdPwgrMBrwYEz9BwQrmfEHh\r\nUBpSmHarkukgrZChQXUIz1GgxRXwdT2aet92VGn67yFnfeLXdmZRJdV0Sxe0WuEC\r\nM/6cwdw3JJI/cKKa3ACeupGpAoGAUTHFfS+C41kSLHjFXYm0sbvHcQZ/BOM2fMnd\r\nWo48Axcy4aXiQoby2zkAykxQPBqL4RcR7uu6hWktLEPKZpjpISnKNsST601iseQn\r\nTMrlNW1QamTyiT+g4XeqU50uVEHyv/uLjWTip6A/YAYEVKQKhOFDCwfwplHdtLYX\r\ntjtKpf0CgYEA5VfMwfWtl8XtoVTxyYRahW/Ar3puKCmsyQMvkKIXjh8VhXI4rbkH\r\nAvYaB80GyVuqwbvf7oxXb3hB/NCn9db/zwFDz2sUClsCj/37dnzzMznA9Nrrwmkt\r\n/AEJZV/p0PgYsnqL9jPJ2e1w8X9gsXu6VEjP6iN/KLWCBIiPArfU2fU=\r\n-----END RSA PRIVATE KEY-----\r\n");
 
@@ -609,7 +763,7 @@ public class Main {
 		if (!out.isDirectory()) {
 			out.mkdirs();
 		}
-		
+
 		shell.open();
 		shell.layout();
 		while (!shell.isDisposed()) {
@@ -618,6 +772,7 @@ public class Main {
 			}
 		}
 	}
+
 	static void reloadCA() {
 		String dn = CA.getIssuerDN();
 		for (String kvs : dn.split(",")) {
@@ -625,52 +780,45 @@ public class Main {
 			String k = kv[0].trim();
 			String v = kv[1].trim();
 			switch (k) {
-			case "CN":tcaCN.setText(v);break;
-			case "OU":tcaOU.setText(v);break;
-			case "O":tcaO.setText(v);break;
-			case "L":tcaL.setText(v);break;
-			case "ST":tcaST.setText(v);break;
-			case "C":tcaC.setText(v);break;
-			case "E":tcaE.setText(v);break;
-			default:break;
+			case "CN":
+				tcaCN.setText(v);
+				break;
+			case "OU":
+				tcaOU.setText(v);
+				break;
+			case "O":
+				tcaO.setText(v);
+				break;
+			case "L":
+				tcaL.setText(v);
+				break;
+			case "ST":
+				tcaST.setText(v);
+				break;
+			case "C":
+				tcaC.setText(v);
+				break;
+			case "E":
+				tcaE.setText(v);
+				break;
+			default:
+				break;
 			}
 		}
 		tcaSF.setText(CA.getSignatureAlgorithm());
 		tcaXH.setText("0" + CA.getCacert().getSerialNumber().intValue());
 		String begin = sdf.format(CA.getCacert().getNotBefore());
 		String end = sdf.format(CA.getCacert().getNotAfter());
-		tcaSJ.setText(begin + "~" + end);
+		tcaSJ.setText(begin + " 至 " + end);
 	}
-	static void show(Shell shell, String msg) {
-		final Shell dialog = new Shell(shell, SWT.PRIMARY_MODAL);
-		dialog.setSize(200, 100);
-		dialog.setLocation(shell.getLocation().x + dialog.getSize().x / 2, shell.getLocation().y + dialog.getSize().y / 2);
-		
-		Label label = new Label(dialog, SWT.NONE);
-		label.setBounds(21, 10, 61, 17);
-		label.setText("输入密码");
-		
-		text = new Text(dialog, SWT.BORDER | SWT.PASSWORD);
-		text.setBounds(20, 34, 168, 23);
-		text.setText("123456");
-		
-		Button btnNewButton = new Button(dialog, SWT.NONE);
-		btnNewButton.setBounds(108, 61, 80, 27);
-		btnNewButton.setText("确定");
-		btnNewButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				caCertKsPwd = text.getText();
-				dialog.dispose();
-			}
-		});
-		
-		dialog.open();
-		dialog.layout();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
+
+	private static void alertMsg(String msg) {
+		MessageBox box = new MessageBox(shell, SWT.PRIMARY_MODAL | SWT.OK | SWT.ICON_INFORMATION);
+		box.setText("消息");
+		box.setMessage(msg);
+		box.open();
+	}
+	private static boolean isEmpty(String str) {
+		return str == null || "".equals(str);
 	}
 }

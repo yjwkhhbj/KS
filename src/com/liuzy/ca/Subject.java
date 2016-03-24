@@ -71,6 +71,11 @@ public class Subject {
 		KsUtils.writeBks(cert, alias, privateKey, keyPwd, ksPwd, path);
 	}
 
+	/** 保存证书和私钥到P12文件 */
+	public void saveKey2P12(String alias, String keyPwd, String ksPwd, String path) {
+		KsUtils.writeP12(cert, alias, privateKey, keyPwd, ksPwd, path);
+	}
+
 	public String getSubjectDN() {
 		return subjectDN;
 	}
