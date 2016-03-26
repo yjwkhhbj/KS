@@ -22,8 +22,7 @@ public class Unionpay {
 
 		Terminal terminal = new Terminal("123456789004500", "12345601");
 
-		CACenter pmCA = new CACenter();
-		pmCA.init(PM_CA_CRT, PM_CA_PEM);
+		CACenter pmCA = new CACenter(PM_CA_CRT, PM_CA_PEM);
 		
 		terminal.setCert(pmCA.sign(terminal.getPublicKey(), terminal.getSubjectDN(), "SHA1withRSA"));
 		

@@ -13,7 +13,7 @@ import com.liuzy.ca.Subject;
  * @since 2016年3月23日
  */
 public class MyServer {
-	static String testDir = "D:/";
+	static String testDir = "D:/KS/";
 
 	public static void main(String[] args) throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
@@ -22,7 +22,6 @@ public class MyServer {
 
 	public static void signAll() throws Exception {
 		CACenter CA = new CACenter("CN=CA,OU=CA,O=liuzy,L=shanghai,ST=shanghai,C=cn");
-		CA.init();
 		CA.saveCert2Jks("ca", "123456", testDir + "tomcat_trust.jks");
 		CA.saveCert(testDir + "ca.crt");
 		CA.saveRsaKey(testDir + "ca.pem");
@@ -45,8 +44,7 @@ public class MyServer {
 	}
 
 	public static void signClient() throws Exception {
-		CACenter CA = new CACenter();
-		CA.init(testDir + "ca.crt", testDir + "ca.pem");
+		CACenter CA = new CACenter(testDir + "ca.crt", testDir + "ca.pem");
 
 		Subject client = new Subject("CN=client2,OU=client,O=liuzy,L=shanghai,ST=shanghai,C=cn");
 		client.setCert(CA.sign(client.getPublicKey(), client.getSubjectDN()));

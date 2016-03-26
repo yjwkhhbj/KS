@@ -84,6 +84,15 @@ public class Main {
 	private static Button btnKeyOutJks;
 	private static Button btnKeyOutBks;
 	private static Button btnKeyOutP12;
+	private static Button btnCaSaveCert;
+	private static Button btnCaSaveCert2Ks;
+	private static Button btnCaSaveAll;
+	private static Button btnbks_1;
+	private static Button btnCaSaveKey;
+	private static Button btnCaSavePkcs8Key;
+	private static Combo comboCAsf;
+	private static Combo comboCAkeylength;
+	private static Combo comboCAyear;
 
 	public static void main(String[] args) {
 		Security.addProvider(new BouncyCastleProvider());
@@ -195,10 +204,10 @@ public class Main {
 		txtDN.setText("CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn");
 		txtDN.setBounds(106, 12, 290, 23);
 
-		Combo combo = new Combo(compositeByHand, SWT.NONE);
-		combo.setItems(new String[] { "SHA1withRSA", "SHA256withRSA" });
-		combo.setBounds(106, 51, 171, 25);
-		combo.select(0);
+		comboCAsf = new Combo(compositeByHand, SWT.NONE);
+		comboCAsf.setItems(new String[] { "SHA1withRSA", "SHA256withRSA" });
+		comboCAsf.setBounds(106, 51, 171, 25);
+		comboCAsf.select(0);
 
 		Label lblDn = new Label(compositeByHand, SWT.NONE);
 		lblDn.setBounds(39, 15, 61, 17);
@@ -220,15 +229,15 @@ public class Main {
 		label_3.setText("有效期");
 		label_3.setBounds(39, 138, 61, 17);
 
-		Combo combo_1 = new Combo(compositeByHand, SWT.NONE);
-		combo_1.setItems(new String[] { "1年", "5年", "10年", "20年" });
-		combo_1.setBounds(106, 130, 73, 25);
-		combo_1.select(2);
+		comboCAyear = new Combo(compositeByHand, SWT.NONE);
+		comboCAyear.setItems(new String[] { "1年", "5年", "10年", "20年" });
+		comboCAyear.setBounds(106, 130, 73, 25);
+		comboCAyear.select(2);
 		
-		Combo combo_3 = new Combo(compositeByHand, SWT.NONE);
-		combo_3.setItems(new String[] {"1024", "2048", "4096"});
-		combo_3.setBounds(106, 93, 73, 25);
-		combo_3.select(1);
+		comboCAkeylength = new Combo(compositeByHand, SWT.NONE);
+		comboCAkeylength.setItems(new String[] {"1024", "2048", "4096"});
+		comboCAkeylength.setBounds(106, 93, 73, 25);
+		comboCAkeylength.select(1);
 
 		button = new Button(compositeStart, SWT.NONE);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -240,12 +249,13 @@ public class Main {
 						String caCertFile = textCaCertFile.getText();
 						String caPemFile = textCaPemFile.getText();
 						if (!isEmpty(caCertFile) && ! isEmpty(caCertFile)) {
-							CA = new CACenter();
-							CA.init(caCertFile, caPemFile);
+							CA = new CACenter(caCertFile, caPemFile);
 						}
 					} else {
+						CACenter.year = Integer.parseInt(comboCAyear.getItem(comboCAyear.getSelectionIndex()).replace("年", ""));
 						CA = new CACenter(txtDN.getText());
-						CA.init();
+						CA.setSignatureAlgorithm(comboCAsf.getItem(comboCAsf.getSelectionIndex()));
+						CA.setKeyLength(Integer.parseInt(comboCAkeylength.getItem(comboCAkeylength.getSelectionIndex())));
 					}
 					if (CA != null) {
 						tabStart.setText(" 重新开始 ");
@@ -274,60 +284,70 @@ public class Main {
 		grpCA.setText(" C A ");
 		grpCA.setBounds(10, 10, 566, 228);
 
-		Button btnCaSaveKey = new Button(grpCA, SWT.NONE);
+		btnCaSaveKey = new Button(grpCA, SWT.NONE);
 		btnCaSaveKey.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnCaSaveKey.setEnabled(false);
 				CA.saveRsaKey(outDir + "ca.pem");
 				alertMsg("已保存到" + outDir + "ca.pem");
+				btnCaSaveKey.setEnabled(true);
 			}
 		});
 		btnCaSaveKey.setBounds(205, 166, 108, 27);
 		btnCaSaveKey.setText("保存私钥");
 
-		Button btnCaSavePkcs8Key = new Button(grpCA, SWT.NONE);
+		btnCaSavePkcs8Key = new Button(grpCA, SWT.NONE);
 		btnCaSavePkcs8Key.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnCaSavePkcs8Key.setEnabled(false);
 				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
 				alertMsg("已保存到" + outDir + "ca_pkcs8.pem");
+				btnCaSavePkcs8Key.setEnabled(true);
 			}
 		});
 		btnCaSavePkcs8Key.setText("保存PKCS8私钥");
 		btnCaSavePkcs8Key.setBounds(319, 166, 108, 27);
 
-		Button btnCaSaveCert = new Button(grpCA, SWT.NONE);
+		btnCaSaveCert = new Button(grpCA, SWT.NONE);
 		btnCaSaveCert.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnCaSaveCert.setEnabled(false);
 				CA.saveCert(outDir + "ca.crt");
 				alertMsg("已保存到" + outDir + "ca.crt");
+				btnCaSaveCert.setEnabled(true);
 			}
 		});
 		btnCaSaveCert.setText("保存证书");
 		btnCaSaveCert.setBounds(205, 120, 108, 27);
 
-		Button btnCaSaveCert2Ks = new Button(grpCA, SWT.NONE);
+		btnCaSaveCert2Ks = new Button(grpCA, SWT.NONE);
 		btnCaSaveCert2Ks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnCaSaveCert2Ks.setEnabled(false);
 				CA.saveCert2Jks("ca", caCertKsPwd, outDir + "ca_cert.jks");
 				alertMsg("默认密码为123456\r\n已保存到" + outDir + "ca_cert.jks");
+				btnCaSaveCert2Ks.setEnabled(true);
 			}
 		});
 		btnCaSaveCert2Ks.setText("保存JKS证书");
 		btnCaSaveCert2Ks.setBounds(319, 120, 108, 27);
 
-		Button btnCaSaveAll = new Button(grpCA, SWT.NONE);
+		btnCaSaveAll = new Button(grpCA, SWT.NONE);
 		btnCaSaveAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnCaSaveAll.setEnabled(false);
 				CA.saveRsaKey(outDir + "ca.pem");
 				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
 				CA.saveCert(outDir + "ca.crt");
 				CA.saveCert2Jks("ca", "123456", outDir + "ca_cert.jks");
 				CA.saveCert2Bks("ca", "123456", outDir + "ca_cert.bks");
 				alertMsg("默认密码为123456\r\n已保存到" + outDir);
+				btnCaSaveAll.setEnabled(true);
 			}
 		});
 		btnCaSaveAll.setText("保存所有");
@@ -391,12 +411,14 @@ public class Main {
 		lblE.setText("E");
 		lblE.setBounds(10, 198, 28, 17);
 		
-		Button btnbks_1 = new Button(grpCA, SWT.NONE);
+		btnbks_1 = new Button(grpCA, SWT.NONE);
 		btnbks_1.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnbks_1.setEnabled(false);
 				CA.saveCert2Jks("ca", caCertKsPwd, outDir + "ca_cert.bks");
 				alertMsg("默认密码为123456\r\n已保存到" + outDir + "ca_cert.bks");
+				btnbks_1.setEnabled(true);
 			}
 		});
 		btnbks_1.setText("保存BKS证书");
@@ -938,14 +960,14 @@ public class Main {
 			}
 		}
 		tcaSF.setText(CA.getSignatureAlgorithm());
-		tcaXH.setText("0" + CA.getCacert().getSerialNumber().intValue());
-		String begin = sdf.format(CA.getCacert().getNotBefore());
-		String end = sdf.format(CA.getCacert().getNotAfter());
+		tcaXH.setText("0" + CA.getCert().getSerialNumber().intValue());
+		String begin = sdf.format(CA.getCert().getNotBefore());
+		String end = sdf.format(CA.getCert().getNotAfter());
 		tcaSJ.setText(begin + " 至 " + end);
 	}
 
 	private static void alertMsg(String msg) {
-		MessageBox box = new MessageBox(shell, SWT.PRIMARY_MODAL | SWT.OK | SWT.ICON_INFORMATION);
+		MessageBox box = new MessageBox(shell, SWT.PRIMARY_MODAL | SWT.OK);
 		box.setText("消息");
 		box.setMessage(msg);
 		box.open();

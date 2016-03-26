@@ -65,9 +65,8 @@ public class CaTest {
 
 	public static void testCACenter1() throws Exception {
 		// CA初始化1
-		CACenter caCenter = new CACenter();
-		caCenter.init();
-		CertUtils.write(caCenter.getCacert(), testDir + "ca.crt");
+		CACenter caCenter = new CACenter("CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn");
+		CertUtils.write(caCenter.getCert(), testDir + "ca.crt");
 		KeyUtils.write2RsaKey(caCenter.getPrivateKey(), testDir + "ca.pem");
 		
 		// 签发1 根据公钥和使用者信息
@@ -78,8 +77,7 @@ public class CaTest {
 
 	public static void testCACenter2() throws Exception {
 		// CA初始化2
-		CACenter caCenter = new CACenter();
-		caCenter.init(testDir + "ca.crt", testDir + "ca.pem");
+		CACenter caCenter = new CACenter(testDir + "ca.crt", testDir + "ca.pem");
 		
 		// 签发2 根据证书请求文件
 		PKCS10CertificationRequest csr = CertReqUtils.read(testDir + "me.csr");

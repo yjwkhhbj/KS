@@ -1,9 +1,6 @@
 package com.liuzy.ca;
 
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
@@ -28,7 +25,6 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
 import com.liuzy.utils.CertUtils;
 import com.liuzy.utils.KeyUtils;
-import com.liuzy.utils.KsUtils;
 
 /**
  * CA证书签发中心
@@ -36,44 +32,25 @@ import com.liuzy.utils.KsUtils;
  * @author liuzy
  * @version 2016-3-20
  */
-public class CACenter {
+public class CACenter extends Subject {
 	// 序列号
-	static int serialNumber = 1;
-	// CA的信息
-	private String subjectDN = "CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn";
-	// CA的私钥
-	private PrivateKey privateKey;
-	// CA的公钥
-	private PublicKey publicKey;
-	// CA的自签证书
-	private X509Certificate cacert;
-	// CA的签名算法
-	private String signatureAlgorithm = "SHA1withRSA";
+	private static int serialNumber = 1;
 
-	public CACenter() {
-	}
+	// 有效期
+	public static int year = 10;
 
-	public CACenter(String subjectDN) {
-		this.subjectDN = subjectDN;
-	}
-
-	public CACenter(String CN, String OU, String O, String L, String ST, String C) {
-		subjectDN = String.format("CN=%s,OU=%s,O=%s,L=%s,ST=%s,C=%s", CN, OU, O, L, ST, C);
+	public CACenter() throws Exception {
+		this("CN=CA,OU=CA,O=liuzy,L=shanghai,ST=shanghai,C=cn");
 	}
 
 	/**
 	 * 自己生成CA私钥和CA自签证书
 	 */
-	public void init() throws Exception {
-		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-		kpg.initialize(2048);
-		KeyPair kp = kpg.generateKeyPair();
-		publicKey = kp.getPublic();
-		privateKey = kp.getPrivate();
-
+	public CACenter(String subjectDN) throws Exception {
+		super(subjectDN);
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
-		calendar.add(Calendar.YEAR, 10);
+		calendar.add(Calendar.YEAR, year);
 		Date notAfter = calendar.getTime();
 
 		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
@@ -86,10 +63,10 @@ public class CACenter {
 		certBuilder.addExtension(Extension.subjectKeyIdentifier, false, subj);
 
 		ContentSigner caSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
-		cacert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certBuilder.build(caSigner));
+		cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certBuilder.build(caSigner));
 
-		cacert.checkValidity(new Date());
-		cacert.verify(publicKey);
+		cert.checkValidity(new Date());
+		cert.verify(publicKey);
 	}
 
 	/**
@@ -98,14 +75,17 @@ public class CACenter {
 	 * @param cacertFile
 	 * @param capemFile
 	 */
-	public void init(String cacertFile, String capemFile) throws Exception {
-		cacert = (X509Certificate) CertUtils.read(cacertFile);
-		subjectDN = cacert.getSubjectDN().toString();
-		if (!isCA(cacert)) {
+	public CACenter(String cacertFile, String capemFile) throws Exception {
+		cert = (X509Certificate) CertUtils.read(cacertFile);
+		subjectDN = cert.getSubjectDN().toString();
+		if (!isCA(cert)) {
 			throw new RuntimeException("该证书不是CA证书");
 		}
-		publicKey = cacert.getPublicKey();
+		publicKey = cert.getPublicKey();
 		privateKey = KeyUtils.read(capemFile).getPrivate();
+		cert.checkValidity(new Date());
+		cert.verify(publicKey);
+		year = new Long((cert.getNotAfter().getTime() - cert.getNotBefore().getTime()) / 1000 / 60 / 60 / 24 / 365).intValue();
 	}
 
 	/**
@@ -119,7 +99,7 @@ public class CACenter {
 		ASN1InputStream in1 = null;
 		ASN1InputStream in2 = null;
 		try {
-			if (cacert.getSubjectDN().toString().equals(cacert.getIssuerDN().toString())) {
+			if (cert.getSubjectDN().toString().equals(cert.getIssuerDN().toString())) {
 				return true;
 			}
 			byte[] basicConstraints = cert.getExtensionValue("2.5.29.19");
@@ -169,7 +149,7 @@ public class CACenter {
 	public X509Certificate sign(PublicKey hisPublicKey, X500Name subject, String signatureAlgorithm) throws Exception {
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
-		calendar.add(Calendar.YEAR, 10);
+		calendar.add(Calendar.YEAR, year);
 		Date notAfter = calendar.getTime();
 
 		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
@@ -200,47 +180,6 @@ public class CACenter {
 		ASN1ObjectIdentifier OID = req.getSignatureAlgorithm().getAlgorithm();
 		DefaultAlgorithmNameFinder finder = new DefaultAlgorithmNameFinder();
 		return sign(req.getPublicKey(), req.getSubject(), finder.getAlgorithmName(OID));
-	}
-
-	/** 保存证书文件 */
-	public void saveCert(String path) {
-		CertUtils.write(cacert, path);
-	}
-
-	/** 保存私钥到文件 */
-	public void saveRsaKey(String path) {
-		KeyUtils.write2RsaKey(privateKey, path);
-	}
-
-	/** 保存PKCS8格式私钥到文件 */
-	public void savePkcs8Key(String path) {
-		KeyUtils.write2PKCS8Key(privateKey, path);
-	}
-
-	/** 保存证书到JavaKeyStore文件 */
-	public void saveCert2Jks(String alias, String ksPwd, String path) {
-		KsUtils.writeJks(cacert, alias, ksPwd, path);
-	}
-	
-	/** 保存证书到BcKeyStore文件 */
-	public void saveCert2Bks(String alias, String ksPwd, String path) {
-		KsUtils.writeBks(cacert, alias, ksPwd, path);
-	}
-
-	public X509Certificate getCacert() {
-		return cacert;
-	}
-
-	public PrivateKey getPrivateKey() {
-		return privateKey;
-	}
-
-	public String getSubjectDN() {
-		return subjectDN;
-	}
-
-	public String getSignatureAlgorithm() {
-		return signatureAlgorithm;
 	}
 
 }
