@@ -3,6 +3,7 @@ package com.liuzy.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.PrivateKey;
@@ -12,6 +13,7 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
@@ -29,8 +31,9 @@ public class CertReqUtils {
 	 * @param privateKey
 	 * @param signatureAlgorithm
 	 * @return
+	 * @throws OperatorCreationException 
 	 */
-	public static PKCS10CertificationRequest create(PublicKey publicKey, PrivateKey privateKey, String subjectDN, String signatureAlgorithm) {
+	public static PKCS10CertificationRequest create(PublicKey publicKey, PrivateKey privateKey, String subjectDN, String signatureAlgorithm) throws OperatorCreationException {
 		InputStream in = null;
 		try {
 			X500Name x500Name = new X500Name(subjectDN);
@@ -38,9 +41,6 @@ public class CertReqUtils {
 			ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
 			PKCS10CertificationRequest req = builder.build(contentSigner);
 			return req;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			try {
 				if (in != null) {
@@ -56,8 +56,9 @@ public class CertReqUtils {
 	 * 读证书请求文件
 	 * @param csrFile
 	 * @return
+	 * @throws IOException 
 	 */
-	public static PKCS10CertificationRequest read(String csrFile) {
+	public static PKCS10CertificationRequest read(String csrFile) throws IOException {
 		InputStream pemIn = null;
 		InputStreamReader inReader = null;
 		PEMParser pemParser = null;
@@ -66,9 +67,6 @@ public class CertReqUtils {
 			inReader = new InputStreamReader(pemIn);
 			pemParser = new PEMParser(inReader);
 			return (PKCS10CertificationRequest) pemParser.readObject();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			try {
 				if (pemParser != null) {
@@ -93,8 +91,9 @@ public class CertReqUtils {
 	 * -----END CERTIFICATE REQUEST-----</pre>
 	 * @param csr
 	 * @param path
+	 * @throws IOException 
 	 */
-	public static void write(PKCS10CertificationRequest req, String path) {
+	public static void write(PKCS10CertificationRequest req, String path) throws IOException {
 		FileWriter fw = null;
 		JcaPEMWriter pw = null;
 		try {
@@ -103,8 +102,6 @@ public class CertReqUtils {
 			pw.writeObject(req);
 			pw.flush();
 			fw.flush();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				if (pw != null) {

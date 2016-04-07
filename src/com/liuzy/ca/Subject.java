@@ -1,10 +1,14 @@
 package com.liuzy.ca;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import com.liuzy.utils.CertUtils;
@@ -42,18 +46,18 @@ public class Subject {
 		subjectDN = String.format("CN=%s,OU=%s,O=%s,L=%s,ST=%s,C=%s", CN, OU, O, L, ST, C);
 	}
 
-	/** 保存证书文件 */
-	public void saveCert(String path) {
+	/** 保存证书文件  */
+	public void saveCert(String path) throws IOException {
 		CertUtils.write(cert, path);
 	}
 
-	/** 保存私钥到文件 */
-	public void saveRsaKey(String path) {
+	/** 保存私钥到文件  */
+	public void saveRsaKey(String path) throws IOException {
 		KeyUtils.write2RsaKey(privateKey, path);
 	}
 
-	/** 保存PKCS8格式私钥到文件 */
-	public void savePkcs8Key(String path) {
+	/** 保存PKCS8格式私钥到文件  */
+	public void savePkcs8Key(String path) throws IOException {
 		KeyUtils.write2PKCS8Key(privateKey, path);
 	}
 
@@ -62,8 +66,8 @@ public class Subject {
 		KsUtils.writeJks(cert, alias, ksPwd, path);
 	}
 
-	/** 保存证书到BcKeyStore文件 */
-	public void saveCert2Bks(String alias, String ksPwd, String path) {
+	/** 保存证书到BcKeyStore文件  */
+	public void saveCert2Bks(String alias, String ksPwd, String path) throws KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException, IOException {
 		KsUtils.writeBks(cert, alias, ksPwd, path);
 	}
 
@@ -72,13 +76,13 @@ public class Subject {
 		KsUtils.writeJks(cert, alias, privateKey, keyPwd, ksPwd, path);
 	}
 
-	/** 保存证书和私钥到BcKeyStore文件 */
-	public void saveKey2Bks(String alias, String keyPwd, String ksPwd, String path) {
+	/** 保存证书和私钥到BcKeyStore文件  */
+	public void saveKey2Bks(String alias, String keyPwd, String ksPwd, String path) throws KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException, IOException {
 		KsUtils.writeBks(cert, alias, privateKey, keyPwd, ksPwd, path);
 	}
 
-	/** 保存证书和私钥到P12文件 */
-	public void saveKey2P12(String alias, String keyPwd, String ksPwd, String path) {
+	/** 保存证书和私钥到P12文件  */
+	public void saveKey2P12(String alias, String keyPwd, String ksPwd, String path) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		KsUtils.writeP12(cert, alias, privateKey, keyPwd, ksPwd, path);
 	}
 

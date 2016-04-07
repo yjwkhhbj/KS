@@ -1,7 +1,13 @@
 package com.liuzy.ca;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,11 +20,13 @@ import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
@@ -46,7 +54,7 @@ public class CACenter extends Subject {
 	/**
 	 * 自己生成CA私钥和CA自签证书
 	 */
-	public CACenter(String subjectDN) throws Exception {
+	public CACenter(String subjectDN) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException  {
 		super(subjectDN);
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
@@ -75,7 +83,7 @@ public class CACenter extends Subject {
 	 * @param cacertFile
 	 * @param capemFile
 	 */
-	public CACenter(String cacertFile, String capemFile) throws Exception {
+	public CACenter(String cacertFile, String capemFile) throws IOException, InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
 		cert = (X509Certificate) CertUtils.read(cacertFile);
 		subjectDN = cert.getSubjectDN().toString();
 		if (!isCA(cert)) {
@@ -93,9 +101,9 @@ public class CACenter extends Subject {
 	 * 
 	 * @param cert
 	 * @return
-	 * @throws Exception
+	 * @throws IOException 
 	 */
-	public boolean isCA(X509Certificate cert) throws Exception {
+	public boolean isCA(X509Certificate cert) throws IOException {
 		ASN1InputStream in1 = null;
 		ASN1InputStream in2 = null;
 		try {
@@ -129,11 +137,11 @@ public class CACenter extends Subject {
 	 * @param SubjectDN
 	 * @return
 	 */
-	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN) throws Exception {
+	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN) throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
 		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
 	}
 
-	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws Exception {
+	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
 		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
 	}
 
@@ -144,9 +152,8 @@ public class CACenter extends Subject {
 	 * @param subjectDN
 	 * @param signatureAlgorithm
 	 * @return
-	 * @throws Exception
 	 */
-	public X509Certificate sign(PublicKey hisPublicKey, X500Name subject, String signatureAlgorithm) throws Exception {
+	public X509Certificate sign(PublicKey hisPublicKey, X500Name subject, String signatureAlgorithm) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
 		calendar.add(Calendar.YEAR, year);

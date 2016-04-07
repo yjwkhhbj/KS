@@ -2,8 +2,11 @@ package com.liuzy.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
@@ -27,10 +30,11 @@ public class CertUtils {
 	 * -----END CERTIFICATE-----
 	 * </pre>
 	 * 
-	 * @param chain
+	 * @param cert
 	 * @param path
+	 * @throws IOException 
 	 */
-	public static void write(X509Certificate cert, String path) {
+	public static void write(X509Certificate cert, String path) throws IOException {
 		FileWriter fw = null;
 		JcaPEMWriter pw = null;
 		try {
@@ -39,8 +43,6 @@ public class CertUtils {
 			pw.writeObject(cert);
 			pw.flush();
 			fw.flush();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				if (pw != null) {
@@ -60,17 +62,16 @@ public class CertUtils {
 	 * 
 	 * @param cerFile
 	 * @return
+	 * @throws FileNotFoundException 
+	 * @throws CertificateException 
 	 */
-	public static X509Certificate read(String cerFile) {
+	public static X509Certificate read(String cerFile) throws FileNotFoundException, CertificateException {
 		InputStream crt = null;
 		try {
 			crt = new FileInputStream(new File(cerFile));
 			CertificateFactory cf = CertificateFactory.getInstance("x.509");
 			X509Certificate cert = (X509Certificate) cf.generateCertificate(crt);
 			return cert;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			try {
 				if (crt != null) {
@@ -85,7 +86,7 @@ public class CertUtils {
 	/**
 	 * 打印X509证书信息
 	 * 
-	 * @param cer
+	 * @param cert
 	 */
 	public static void print(X509Certificate cert) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

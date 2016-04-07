@@ -1,6 +1,7 @@
 package com.liuzy.ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -30,6 +31,7 @@ import com.liuzy.http.KsManager;
 import com.liuzy.utils.CertUtils;
 import com.liuzy.utils.KeyUtils;
 import com.liuzy.utils.KsUtils;
+
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class Main {
@@ -289,8 +291,13 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				btnCaSaveKey.setEnabled(false);
-				CA.saveRsaKey(outDir + "ca.pem");
-				alertMsg("已保存到" + outDir + "ca.pem");
+				try {
+					CA.saveRsaKey(outDir + "ca.pem");
+					alertMsg("已保存到" + outDir + "ca.pem");
+				} catch (IOException e2) {
+					alertMsg("保存失败");
+					e2.printStackTrace();
+				}
 				btnCaSaveKey.setEnabled(true);
 			}
 		});
@@ -302,8 +309,13 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				btnCaSavePkcs8Key.setEnabled(false);
-				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
-				alertMsg("已保存到" + outDir + "ca_pkcs8.pem");
+				try {
+					CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
+					alertMsg("已保存到" + outDir + "ca_pkcs8.pem");
+				} catch (IOException e2) {
+					alertMsg("保存失败");
+					e2.printStackTrace();
+				}
 				btnCaSavePkcs8Key.setEnabled(true);
 			}
 		});
@@ -315,8 +327,13 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				btnCaSaveCert.setEnabled(false);
-				CA.saveCert(outDir + "ca.crt");
-				alertMsg("已保存到" + outDir + "ca.crt");
+				try {
+					CA.saveCert(outDir + "ca.crt");
+					alertMsg("已保存到" + outDir + "ca.crt");
+				} catch (Exception e2) {
+					alertMsg("保存失败");
+					e2.printStackTrace();
+				}
 				btnCaSaveCert.setEnabled(true);
 			}
 		});
@@ -341,12 +358,17 @@ public class Main {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				btnCaSaveAll.setEnabled(false);
-				CA.saveRsaKey(outDir + "ca.pem");
-				CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
-				CA.saveCert(outDir + "ca.crt");
-				CA.saveCert2Jks("ca", "123456", outDir + "ca_cert.jks");
-				CA.saveCert2Bks("ca", "123456", outDir + "ca_cert.bks");
-				alertMsg("默认密码为123456\r\n已保存到" + outDir);
+				try {
+					CA.saveRsaKey(outDir + "ca.pem");
+					CA.savePkcs8Key(outDir + "ca_pkcs8.pem");
+					CA.saveCert(outDir + "ca.crt");
+					CA.saveCert2Jks("ca", "123456", outDir + "ca_cert.jks");
+					CA.saveCert2Bks("ca", "123456", outDir + "ca_cert.bks");
+					alertMsg("默认密码为123456\r\n已保存到" + outDir);
+				} catch (Exception e2) {
+					alertMsg("保存失败");
+					e2.printStackTrace();
+				}
 				btnCaSaveAll.setEnabled(true);
 			}
 		});

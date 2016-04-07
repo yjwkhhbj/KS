@@ -3,6 +3,7 @@ package com.liuzy.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -30,8 +31,9 @@ public class KeyUtils {
 	 * 
 	 * @param pemFile
 	 * @return
+	 * @throws IOException 
 	 */
-	public static KeyPair read(String pemFile) {
+	public static KeyPair read(String pemFile) throws IOException {
 		InputStream pemIn = null;
 		InputStreamReader inReader = null;
 		PEMParser pemParser = null;
@@ -42,9 +44,6 @@ public class KeyUtils {
 			PEMKeyPair kp = (PEMKeyPair) pemParser.readObject();
 			JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
 			return converter.getKeyPair(kp);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			try {
 				if (pemParser != null) {
@@ -73,15 +72,14 @@ public class KeyUtils {
 	 * 
 	 * @param pk
 	 * @param path
+	 * @throws IOException 
 	 */
-	public static void write2RsaKey(PrivateKey pk, String path) {
+	public static void write2RsaKey(PrivateKey pk, String path) throws IOException {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(new File(path));
 			fw.write(toRsaKeyStr(pk));
 			fw.flush();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				if (fw != null) {
@@ -103,8 +101,9 @@ public class KeyUtils {
 	 * </pre>
 	 * 
 	 * @param pk
+	 * @throws IOException 
 	 */
-	public static String toRsaKeyStr(PrivateKey pk) {
+	public static String toRsaKeyStr(PrivateKey pk) throws IOException {
 		StringWriter sw = null;
 		JcaPEMWriter pw = null;
 		try {
@@ -114,9 +113,6 @@ public class KeyUtils {
 			pw.flush();
 			sw.flush();
 			return sw.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			try {
 				if (pw != null) {
@@ -142,15 +138,14 @@ public class KeyUtils {
 	 * 
 	 * @param pk
 	 * @param path
+	 * @throws IOException 
 	 */
-	public static void write2PKCS8Key(PrivateKey pk, String path) {
+	public static void write2PKCS8Key(PrivateKey pk, String path) throws IOException {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(new File(path));
 			fw.write(toPKCS8KeyStr(pk));
 			fw.flush();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				if (fw != null) {
@@ -172,8 +167,9 @@ public class KeyUtils {
 	 * </pre>
 	 * 
 	 * @param pk
+	 * @throws IOException 
 	 */
-	public static String toPKCS8KeyStr(PrivateKey pk) {
+	public static String toPKCS8KeyStr(PrivateKey pk) throws IOException {
 		StringWriter sw = null;
 		PemWriter pw = null;
 		try {
@@ -184,9 +180,6 @@ public class KeyUtils {
 			pw.flush();
 			sw.flush();
 			return sw.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			try {
 				if (pw != null) {

@@ -1,5 +1,6 @@
 package com.liuzy.test;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -51,7 +52,7 @@ class Terminal {
 			e.printStackTrace();
 		}
 	}
-	public void saveToDir(String path) {
+	public void saveToDir(String path) throws IOException {
 		String pemFile = path + merId + "_" + terId + ".pem";
 		KeyUtils.write2RsaKey(privateKey, pemFile);
 		String certFile = path + merId + "_" + terId + ".crt";
