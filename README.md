@@ -278,7 +278,13 @@ nginx -s reload
 
 ![主界面](https://liuzy.xyz/files/ks1.jpg)
 
-![CA中心](https://liuzy.xyz/files/ks2.jpg)
+![主界面](https://liuzy.xyz/files/ks2.jpg)
 
-![库工具](https://liuzy.xyz/files/ks3.jpg)
+![CA中心](https://liuzy.xyz/files/ks3.jpg)
+
+![证书和密钥导入到库](https://liuzy.xyz/files/ks4.jpg)
+
+![从库导出证书和密钥](https://liuzy.xyz/files/ks5.jpg)
+
+![查看库信息](https://liuzy.xyz/files/ks6.jpg)
 
