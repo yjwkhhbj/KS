@@ -539,15 +539,15 @@ public class Main {
 		btnCaSignClient.setBounds(170, 51, 108, 27);
 		btnCaSignClient.setText("签发客户端");
 
-		Button button_4 = new Button(group, SWT.NONE);
-		button_4.addSelectionListener(new SelectionAdapter() {
+		Button btnShowCaSignHand = new Button(group, SWT.NONE);
+		btnShowCaSignHand.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				tabFolder.setSelection(2);
 			}
 		});
-		button_4.setBounds(390, 34, 108, 27);
-		button_4.setText("手动签发");
+		btnShowCaSignHand.setBounds(390, 34, 108, 27);
+		btnShowCaSignHand.setText("手动签发");
 
 		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(" 证书签发 ");
@@ -555,9 +555,29 @@ public class Main {
 		Composite composite_1 = new Composite(tabFolder, SWT.NONE);
 		tabItem.setControl(composite_1);
 
-		Button button_3 = new Button(composite_1, SWT.NONE);
-		button_3.setBounds(426, 281, 80, 27);
-		button_3.setText(" 签 发 ");
+		Button btnCaSignCustom = new Button(composite_1, SWT.NONE);
+		btnCaSignCustom.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					String CN = txtSubjectCN.getText();
+					String OU = txtSubjectOU.getText();
+					String O = txtSubjectO.getText();
+					String L = txtSubjectL.getText();
+					String ST = txtSubjectST.getText();
+					String C = txtSubjectC.getText();
+					Subject custom = new Subject(String.format("CN=%s,OU=%s,O=%s,L=%s,ST=%s,C=%s", CN, OU, O, L, ST, C));
+					custom.setCert(CA.sign(custom.getPublicKey(), custom.getSubjectDN()));
+					custom.saveCert(outDir + "custom.crt");
+					custom.saveRsaKey(outDir + "custom.pem");
+					alertMsg("custom.crt和custom.pem已保存到" + outDir);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		});
+		btnCaSignCustom.setBounds(426, 281, 80, 27);
+		btnCaSignCustom.setText(" 签 发 ");
 
 		Group group_1 = new Group(composite_1, SWT.NONE);
 		group_1.setText(" 使用者信息 ");
