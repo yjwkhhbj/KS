@@ -47,7 +47,7 @@ public class Main {
 	static String caCertKsPwd = "123456";
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static Display display;
-	private static Shell shell;
+	private static Shell shlJavaLiuzy;
 	private static Text textCaCertFile;
 	private static Text textCaPemFile;
 	private static Text txtDN;
@@ -112,14 +112,14 @@ public class Main {
 		Security.addProvider(new BouncyCastleProvider());
 		display = Display.getDefault();
 
-		shell = new Shell(display, SWT.CLOSE | SWT.MIN);
-		shell.setModified(true);
-		shell.setText("JAVA证书签发和证书库转换工具 —— Liuzy制作 QQ416657468");
-		shell.setSize(600, 400);
-		shell.setLocation(display.getClientArea().width / 2 - shell.getShell().getSize().x / 2, display.getClientArea().height / 2 - shell.getSize().y / 2);
-		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
+		shlJavaLiuzy = new Shell(display, SWT.CLOSE | SWT.MIN);
+		shlJavaLiuzy.setModified(true);
+		shlJavaLiuzy.setText("JAVA证书签发和证书库工具 —— Liuzy制作 QQ416657468");
+		shlJavaLiuzy.setSize(600, 400);
+		shlJavaLiuzy.setLocation(display.getClientArea().width / 2 - shlJavaLiuzy.getShell().getSize().x / 2, display.getClientArea().height / 2 - shlJavaLiuzy.getSize().y / 2);
+		shlJavaLiuzy.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		tabFolder = new TabFolder(shell, SWT.NONE);
+		tabFolder = new TabFolder(shlJavaLiuzy, SWT.NONE);
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -180,7 +180,7 @@ public class Main {
 		button_1.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				FileDialog fileOpen = new FileDialog(shlJavaLiuzy, SWT.OPEN);
 				fileOpen.setFilterNames(new String[] { "证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)" });
 				fileOpen.setFilterExtensions(new String[] { "*.crt;*.cer;*.pem", "*.*" });
 				String path = fileOpen.open();
@@ -196,7 +196,7 @@ public class Main {
 		button_2.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				FileDialog fileOpen = new FileDialog(shlJavaLiuzy, SWT.OPEN);
 				fileOpen.setFilterNames(new String[] { "私钥文件(*.pem;*.key)", "所有文件(*.*)" });
 				fileOpen.setFilterExtensions(new String[] { "*.pem;*.key", "*.*" });
 				String path = fileOpen.open();
@@ -287,6 +287,23 @@ public class Main {
 		});
 		button.setBounds(464, 275, 80, 27);
 		button.setText(" 下 一 步 ");
+		
+		Button btnNewButton_1 = new Button(compositeStart, SWT.NONE);
+		btnNewButton_1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					Runtime.getRuntime().exec("cmd /c start https://git.oschina.net/liuzy1988/KS#第四部分-java证书签发窗口化工具");
+				} catch (IOException e1) {
+					try {
+						Runtime.getRuntime().exec("cmd /c start https://git.oschina.net/liuzy1988/KS");
+					} catch (Exception e2) {
+					}
+				}
+			}
+		});
+		btnNewButton_1.setBounds(464, 22, 80, 27);
+		btnNewButton_1.setText("访 问 官 网");
 
 		TabItem tabCa = new TabItem(tabFolder, SWT.NONE);
 		tabCa.setText(" CA 中 心 ");
@@ -694,7 +711,7 @@ public class Main {
 		button_5.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				FileDialog fileOpen = new FileDialog(shlJavaLiuzy, SWT.OPEN);
 				fileOpen.setFilterNames(new String[] { "证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)" });
 				fileOpen.setFilterExtensions(new String[] { "*.crt;*.cer;*.pem", "*.*" });
 				String path = fileOpen.open();
@@ -785,7 +802,7 @@ public class Main {
 		button_7.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				FileDialog fileOpen = new FileDialog(shlJavaLiuzy, SWT.OPEN);
 				fileOpen.setFilterNames(new String[] { "证书文件(*.crt;*.cer;*.pem)", "所有文件(*.*)" });
 				fileOpen.setFilterExtensions(new String[] { "*.crt;*.cer;*.pem", "*.*" });
 				String path = fileOpen.open();
@@ -808,7 +825,7 @@ public class Main {
 		button_8.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				FileDialog fileOpen = new FileDialog(shlJavaLiuzy, SWT.OPEN);
 				fileOpen.setFilterNames(new String[] { "私钥文件(*.pem;*.key)", "所有文件(*.*)" });
 				fileOpen.setFilterExtensions(new String[] { "*.pem;*.key", "*.*" });
 				String path = fileOpen.open();
@@ -964,7 +981,7 @@ public class Main {
 		button_3.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				FileDialog fileOpen = new FileDialog(shlJavaLiuzy, SWT.OPEN);
 				fileOpen.setFilterNames(new String[] { "密钥库文件(*.keystore;*.jks;*.bks;*.p12)", "所有文件(*.*)" });
 				fileOpen.setFilterExtensions(new String[] { "*.keystore;*.jks;*.bks;*.p12", "*.*" });
 				String path = fileOpen.open();
@@ -1083,9 +1100,9 @@ public class Main {
 			out.mkdirs();
 		}
 
-		shell.open();
-		shell.layout();
-		while (!shell.isDisposed()) {
+		shlJavaLiuzy.open();
+		shlJavaLiuzy.layout();
+		while (!shlJavaLiuzy.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
 			}
@@ -1179,7 +1196,7 @@ public class Main {
 	}
 
 	private static void alertMsg(String msg) {
-		MessageBox box = new MessageBox(shell, SWT.PRIMARY_MODAL | SWT.OK);
+		MessageBox box = new MessageBox(shlJavaLiuzy, SWT.PRIMARY_MODAL | SWT.OK);
 		box.setText("消息");
 		box.setMessage(msg);
 		box.open();
