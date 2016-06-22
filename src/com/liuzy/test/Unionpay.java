@@ -14,25 +14,34 @@ import com.liuzy.ca.CACenter;
 import com.liuzy.utils.CertUtils;
 import com.liuzy.utils.KeyUtils;
 
+/**
+ * 模拟银联POS机证书签发（注意：openssl产生的证书和私钥再用JAVA签发是不能用的！！！）
+ * @author liuzy
+ * @since 2016年6月22日
+ */
 public class Unionpay {
+	// PM CA证书
 	static String PM_CA_CRT = "E:/pm/cacert.crt";
+	// PM CA私钥
 	static String PM_CA_PEM = "E:/pm/cakey.pem";
 
 	public static void main(String[] args) throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
-
+		// 创建一个终端
 		Terminal terminal = new Terminal("123456789004500", "12345601");
-
+		// 创建PM环境CA中心
 		CACenter pmCA = new CACenter(PM_CA_CRT, PM_CA_PEM);
-		
-		terminal.setCert(pmCA.sign(terminal.getPublicKey(), terminal.getSubjectDN(), "SHA1withRSA"));
-		
+		// 签发
+		X509Certificate cert = pmCA.sign(terminal.getPublicKey(), terminal.getSubjectDN(), "SHA1withRSA");
+		terminal.setCert(cert);
+		// 输出
 		terminal.saveToDir("E:/");
 		
 	}
 	
 }
 
+// 终端对象
 class Terminal {
 	private String merId;
 	private String terId;
