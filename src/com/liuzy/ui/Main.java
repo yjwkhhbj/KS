@@ -2,10 +2,14 @@ package com.liuzy.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Key;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import java.util.Enumeration;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.swt.SWT;
@@ -33,6 +37,8 @@ import com.liuzy.utils.KeyUtils;
 import com.liuzy.utils.KsUtils;
 
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
 
 public class Main {
 	static CACenter CA = null;
@@ -68,7 +74,7 @@ public class Main {
 	private static TabItem tabFormFile;
 	private static TabItem tabByHand;
 	private static TabItem tabStart;
-	private static Text txtSs;
+	private static Text txtDisplay;
 	private static Text txtCerFile;
 	private static Text txtServer;
 	private static Text text_12;
@@ -95,6 +101,12 @@ public class Main {
 	private static Combo comboCAsf;
 	private static Combo comboCAkeylength;
 	private static Combo comboCAyear;
+	static KeyStore ks;
+	private static Text txtKsFile;
+	private static Text txtKsPwd;
+	private static Button btnKsShow;
+	private static Combo comboAlias;
+	private static Text txtKeyPwd;
 
 	public static void main(String[] args) {
 		Security.addProvider(new BouncyCastleProvider());
@@ -547,10 +559,10 @@ public class Main {
 			}
 		});
 		btnShowCaSignHand.setBounds(390, 34, 108, 27);
-		btnShowCaSignHand.setText("手动签发");
+		btnShowCaSignHand.setText("自定义签发");
 
 		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
-		tabItem.setText(" 证书签发 ");
+		tabItem.setText("自定义签发");
 
 		Composite composite_1 = new Composite(tabFolder, SWT.NONE);
 		tabItem.setControl(composite_1);
@@ -658,27 +670,27 @@ public class Main {
 		button_6.setBounds(92, 281, 136, 27);
 
 		TabItem tbKsConvert = new TabItem(tabFolder, SWT.NONE);
-		tbKsConvert.setText(" 生成证书/密钥库 ");
+		tbKsConvert.setText("证书和密钥导入到库");
 
 		Composite composite_4 = new Composite(tabFolder, SWT.NONE);
 		tbKsConvert.setControl(composite_4);
 
-		Group group_2 = new Group(composite_4, SWT.NONE);
-		group_2.setText(" 生成证书库 ");
-		group_2.setBounds(10, 10, 566, 145);
+		Group grpssltrustkeystore = new Group(composite_4, SWT.NONE);
+		grpssltrustkeystore.setText(" 生成证书库 (把服务器证书放入库中，对客户端来说称之为\"TrustKeyStore\")");
+		grpssltrustkeystore.setBounds(10, 10, 566, 145);
 
-		txtCerFile = new Text(group_2, SWT.BORDER | SWT.READ_ONLY);
+		txtCerFile = new Text(grpssltrustkeystore, SWT.BORDER | SWT.READ_ONLY);
 		txtCerFile.setBounds(92, 26, 154, 23);
 
-		txtServer = new Text(group_2, SWT.BORDER);
+		txtServer = new Text(grpssltrustkeystore, SWT.BORDER);
 		txtServer.setText("server");
 		txtServer.setBounds(92, 55, 154, 23);
 
-		Label label_12 = new Label(group_2, SWT.RIGHT);
+		Label label_12 = new Label(grpssltrustkeystore, SWT.RIGHT);
 		label_12.setBounds(36, 29, 50, 17);
 		label_12.setText("证书文件");
 
-		Button button_5 = new Button(group_2, SWT.NONE);
+		Button button_5 = new Button(grpssltrustkeystore, SWT.NONE);
 		button_5.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -694,19 +706,19 @@ public class Main {
 		button_5.setBounds(252, 24, 36, 27);
 		button_5.setText("打开");
 
-		Label label_14 = new Label(group_2, SWT.RIGHT);
+		Label label_14 = new Label(grpssltrustkeystore, SWT.RIGHT);
 		label_14.setText("设置别名");
 		label_14.setBounds(36, 58, 50, 17);
 
-		Label label_13 = new Label(group_2, SWT.RIGHT);
+		Label label_13 = new Label(grpssltrustkeystore, SWT.RIGHT);
 		label_13.setText("库密码");
 		label_13.setBounds(36, 87, 50, 17);
 
-		text_2 = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
+		text_2 = new Text(grpssltrustkeystore, SWT.BORDER | SWT.PASSWORD);
 		text_2.setText("123456");
 		text_2.setBounds(92, 84, 154, 23);
 
-		btnCertOutJks = new Button(group_2, SWT.NONE);
+		btnCertOutJks = new Button(grpssltrustkeystore, SWT.NONE);
 		btnCertOutJks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -732,7 +744,7 @@ public class Main {
 		btnCertOutJks.setText("保存JKS");
 		btnCertOutJks.setBounds(390, 26, 108, 27);
 
-		btnCertOutBks = new Button(group_2, SWT.NONE);
+		btnCertOutBks = new Button(grpssltrustkeystore, SWT.NONE);
 		btnCertOutBks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -758,18 +770,18 @@ public class Main {
 		btnCertOutBks.setText("保存BKS");
 		btnCertOutBks.setBounds(390, 89, 108, 27);
 
-		Group group_3 = new Group(composite_4, SWT.NONE);
-		group_3.setText("生成密钥库");
-		group_3.setBounds(10, 161, 566, 171);
+		Group grpkeystore = new Group(composite_4, SWT.NONE);
+		grpkeystore.setText(" 生成密钥库 (把客户端的证书和密钥放入库中，对客户端来说称之为\"KeyStore\")");
+		grpkeystore.setBounds(10, 161, 566, 171);
 
-		Label label_16 = new Label(group_3, SWT.RIGHT);
+		Label label_16 = new Label(grpkeystore, SWT.RIGHT);
 		label_16.setText("证书文件");
 		label_16.setBounds(36, 27, 50, 17);
 
-		text_12 = new Text(group_3, SWT.BORDER | SWT.READ_ONLY);
+		text_12 = new Text(grpkeystore, SWT.BORDER | SWT.READ_ONLY);
 		text_12.setBounds(92, 24, 154, 23);
 
-		Button button_7 = new Button(group_3, SWT.NONE);
+		Button button_7 = new Button(grpkeystore, SWT.NONE);
 		button_7.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -785,14 +797,14 @@ public class Main {
 		button_7.setText("打开");
 		button_7.setBounds(252, 22, 36, 27);
 
-		Label label_17 = new Label(group_3, SWT.RIGHT);
+		Label label_17 = new Label(grpkeystore, SWT.RIGHT);
 		label_17.setText("密钥文件");
 		label_17.setBounds(36, 54, 50, 17);
 
-		text_13 = new Text(group_3, SWT.BORDER | SWT.READ_ONLY);
+		text_13 = new Text(grpkeystore, SWT.BORDER | SWT.READ_ONLY);
 		text_13.setBounds(92, 52, 154, 23);
 
-		Button button_8 = new Button(group_3, SWT.NONE);
+		Button button_8 = new Button(grpkeystore, SWT.NONE);
 		button_8.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -808,31 +820,31 @@ public class Main {
 		button_8.setText("打开");
 		button_8.setBounds(252, 50, 36, 27);
 
-		Label label_19 = new Label(group_3, SWT.RIGHT);
+		Label label_19 = new Label(grpkeystore, SWT.RIGHT);
 		label_19.setText("密钥密码");
 		label_19.setBounds(36, 113, 50, 17);
 
-		text_15 = new Text(group_3, SWT.BORDER | SWT.PASSWORD);
+		text_15 = new Text(grpkeystore, SWT.BORDER | SWT.PASSWORD);
 		text_15.setText("123456");
 		text_15.setBounds(92, 110, 154, 23);
 
-		txtClient = new Text(group_3, SWT.BORDER);
+		txtClient = new Text(grpkeystore, SWT.BORDER);
 		txtClient.setText("client");
 		txtClient.setBounds(92, 81, 154, 23);
 
-		Label label_18 = new Label(group_3, SWT.RIGHT);
+		Label label_18 = new Label(grpkeystore, SWT.RIGHT);
 		label_18.setText("设置别名");
 		label_18.setBounds(36, 84, 50, 17);
 
-		Label label_20 = new Label(group_3, SWT.RIGHT);
+		Label label_20 = new Label(grpkeystore, SWT.RIGHT);
 		label_20.setText("库密码");
 		label_20.setBounds(36, 142, 50, 17);
 
-		text_16 = new Text(group_3, SWT.BORDER | SWT.PASSWORD);
+		text_16 = new Text(grpkeystore, SWT.BORDER | SWT.PASSWORD);
 		text_16.setText("123456");
 		text_16.setBounds(92, 139, 154, 23);
 
-		btnKeyOutJks = new Button(group_3, SWT.NONE);
+		btnKeyOutJks = new Button(grpkeystore, SWT.NONE);
 		btnKeyOutJks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -865,7 +877,7 @@ public class Main {
 		btnKeyOutJks.setText("保存JKS");
 		btnKeyOutJks.setBounds(390, 27, 108, 27);
 
-		btnKeyOutBks = new Button(group_3, SWT.NONE);
+		btnKeyOutBks = new Button(grpkeystore, SWT.NONE);
 		btnKeyOutBks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -898,7 +910,7 @@ public class Main {
 		btnKeyOutBks.setText("保存BKS");
 		btnKeyOutBks.setBounds(390, 76, 108, 27);
 
-		btnKeyOutP12 = new Button(group_3, SWT.NONE);
+		btnKeyOutP12 = new Button(grpkeystore, SWT.NONE);
 		btnKeyOutP12.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -932,21 +944,139 @@ public class Main {
 		btnKeyOutP12.setBounds(390, 125, 108, 27);
 
 		TabItem tbCreateKs = new TabItem(tabFolder, SWT.NONE);
-		tbCreateKs.setText(" 证书/密钥库转换");
+		tbCreateKs.setText("从库导出证书和密钥");
 
 		Composite composite_3 = new Composite(tabFolder, SWT.NONE);
 		tbCreateKs.setControl(composite_3);
+		
+		Group group_2 = new Group(composite_3, SWT.NONE);
+		group_2.setText(" 选择文件 输入库密码");
+		group_2.setBounds(10, 10, 566, 321);
+		
+		txtKsFile = new Text(group_2, SWT.BORDER | SWT.READ_ONLY);
+		txtKsFile.setBounds(194, 33, 154, 23);
+		
+		Label label_15 = new Label(group_2, SWT.RIGHT);
+		label_15.setText("库文件");
+		label_15.setBounds(125, 36, 50, 17);
+		
+		Button button_3 = new Button(group_2, SWT.NONE);
+		button_3.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fileOpen = new FileDialog(shell, SWT.OPEN);
+				fileOpen.setFilterNames(new String[] { "密钥库文件(*.keystore;*.jks;*.bks;*.p12)", "所有文件(*.*)" });
+				fileOpen.setFilterExtensions(new String[] { "*.keystore;*.jks;*.bks;*.p12", "*.*" });
+				String path = fileOpen.open();
+				if (path != null) {
+					txtKsFile.setText(path);
+					reloadKs();
+				}
+			}
+		});
+		button_3.setText("选择");
+		button_3.setBounds(368, 31, 36, 27);
+		
+		Label label_22 = new Label(group_2, SWT.RIGHT);
+		label_22.setText("库密码");
+		label_22.setBounds(125, 92, 50, 17);
+		
+		txtKsPwd = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
+		txtKsPwd.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+				String ksPwd = txtKsPwd.getText();
+				if (txtKeyPwd != null && ksPwd.length() > 0) {
+					reloadKs();
+				}
+			}
+		});
+		txtKsPwd.setText("123456");
+		txtKsPwd.setBounds(194, 89, 154, 23);
+		
+		Button button_4 = new Button(group_2, SWT.NONE);
+		button_4.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String alias = comboAlias.getItem(comboAlias.getSelectionIndex());
+				String c = "", k = "";
+				try {
+					Certificate cert = ks.getCertificate(alias);
+					if (cert instanceof X509Certificate) {
+						String path = "D:/KS/ks_" + alias + ".crt";
+						CertUtils.write((X509Certificate) cert, path);
+						c = "别名为" + alias + "的证书已保存到" + path + "\n";
+					}
+				} catch (Exception e2) {
+				}
+				try {
+					String keyPwd = txtKeyPwd.getText();
+					if (keyPwd != null && !keyPwd.isEmpty()) {
+						Key key = ks.getKey(alias, keyPwd.toCharArray());
+						if (key != null) {
+							String path = "D:/KS/ks_" + alias + ".pem";
+							String path_pkcs8 = "D:/KS/ks_" + alias + "_pkcs8.pem";
+							KeyUtils.write2RsaKey((PrivateKey) key, path);
+							KeyUtils.write2PKCS8Key((PrivateKey) key, path_pkcs8);
+							k = "别名为" + alias + "的密钥已保存到" + path + "和" + path_pkcs8 + "\n";
+						}
+					}
+				} catch (Exception e2) {
+				}
+				alertMsg(c + k);
+			}
+		});
+		button_4.setText(" 导 出 ");
+		button_4.setBounds(194, 259, 154, 27);
+		
+		comboAlias = new Combo(group_2, SWT.READ_ONLY);
+		comboAlias.setItems(new String[] {});
+		comboAlias.setBounds(194, 145, 154, 25);
+		
+		Label label_23 = new Label(group_2, SWT.RIGHT);
+		label_23.setText("密钥密码");
+		label_23.setBounds(125, 204, 50, 17);
+		
+		Label label_24 = new Label(group_2, SWT.RIGHT);
+		label_24.setText("选择别名");
+		label_24.setBounds(125, 148, 50, 17);
+		
+		txtKeyPwd = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
+		txtKeyPwd.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+				if (txtKsPwd != null && txtKeyPwd != null && txtDisplay != null && txtKsPwd.getText().length() > 0 && txtKeyPwd.getText().length() > 0) {
+					reloadKs();
+				}
+			}
+		});
+		txtKeyPwd.setText("123456");
+		txtKeyPwd.setBounds(194, 201, 154, 23);
+		
+		Label label_21 = new Label(group_2, SWT.RIGHT);
+		label_21.setAlignment(SWT.LEFT);
+		label_21.setText("（密码正确才能导出密钥）");
+		label_21.setBounds(354, 204, 154, 17);
+		
+		btnKsShow = new Button(group_2, SWT.NONE);
+		btnKsShow.setEnabled(false);
+		btnKsShow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				tabFolder.setSelection(5);
+			}
+		});
+		btnKsShow.setText("查看");
+		btnKsShow.setBounds(368, 143, 36, 27);
 
 		TabItem tabSet = new TabItem(tabFolder, SWT.NONE);
-		tabSet.setText(" 打 开 ");
+		tabSet.setText(" 查 看 ");
 
 		Composite composite_2 = new Composite(tabFolder, SWT.NONE);
 		tabSet.setControl(composite_2);
 		composite_2.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		txtSs = new Text(composite_2, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
-		txtSs.setFont(SWTResourceManager.getFont("Consolas", 10, SWT.NORMAL));
-		txtSs.setText("-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAzWP/Gpm8Tl15IkaizjM67XzKE/QTKhACirEwaN8zIpV7+uBJ\r\nMNp4Ff37AFotPjAQ9pvhcExtwyCF8SoqmsAPuVuo6U2JZ3zsFQmZ1ahejF8Xgz7h\r\nQ0zNgZaA73zotZCMcp/+TFA64EhY26Zrd7doF2SFdJ/VuoISAHFAHXVgsW7rzb5I\r\nDXYV/ntfqUjPFmGiOCWr7FsQiu2SYj4r1/U8q01o0vcnEdQxcmhQs/aILJTBrsJu\r\nQ5139iXzH2AgRxu1AhEer5Bn3dowkrLMjxB4ppmOihvvInBXg107gLg8r5ubbbJy\r\nZy4JwEOimRi1z9zayrg8RKgXo33HFr+1S3rnPwIDAQABAoIBAQC7fUnVTXthCeDX\r\nEiXyFz/2pNCPEGIiJoU7d+4Z/Y3fRxfq9qy5ZOT0Jmnnc2oTd6s0gy1y5sHXuquq\r\nb3R+2U5BRVPWzQneJ2IW/jGooU7V0sRS8aaOWeDLJ8lBVQPVIkOjKzvnC+IC9Ofw\r\ncmVt3kWt/Pv6byGaZLvsHXWKrqh6roPtGUvtXHzyGOLB1k+XMqShml3SHTRmli/c\r\n7scH400VQWsy+EsjIk13PnMxHUQoy+58C/ot2VLNUPAOkxWaaGSxK2gACjq4Izwb\r\nlab+w/vkpbf5BNFp0Xsf+TsxAc5UvIcmdtN7BEz2a0B2w/wJZlIWiZOAwCkO8jH3\r\nPAfj81w5AoGBAPY1c7IEdhXX6wW4tMQ5f6L9nsAPzLceB+phOnKhTwi+T2XuYaSl\r\nyX1ODUXJgV59BpFAsIkfQHTfEz4Ukpm3/cBQdk11ne4mxR4ilrasi0GJgvmB4ZJk\r\nqBNkw+Msx5VI/7t2Bh47OSxgMymwasU/JVAQDCZfRb1/ZCmT8q6nTTN7AoGBANWO\r\n/edU9RZjCZoCIqXAwUVTBEBgfrGpjBZms5NBLKzX8OKdFxcT6khEQuXX2rBPzyHx\r\n9J2+xjMEo7426WQC6kAesVD6eCTrAo0Ctt5K6zgCcZEoBvfFqjjx2bYVPwvj1rfJ\r\nS714J/35mWfQSmlvzfQ5Px3rBFk/CCyBYD2s7r4NAoGBAM8mQeVxY3kVZaQ2t8Cx\r\nL/aOtNabdH5NQhOtImP33Gta06rLWlQROOm4leo1lCdPwgrMBrwYEz9BwQrmfEHh\r\nUBpSmHarkukgrZChQXUIz1GgxRXwdT2aet92VGn67yFnfeLXdmZRJdV0Sxe0WuEC\r\nM/6cwdw3JJI/cKKa3ACeupGpAoGAUTHFfS+C41kSLHjFXYm0sbvHcQZ/BOM2fMnd\r\nWo48Axcy4aXiQoby2zkAykxQPBqL4RcR7uu6hWktLEPKZpjpISnKNsST601iseQn\r\nTMrlNW1QamTyiT+g4XeqU50uVEHyv/uLjWTip6A/YAYEVKQKhOFDCwfwplHdtLYX\r\ntjtKpf0CgYEA5VfMwfWtl8XtoVTxyYRahW/Ar3puKCmsyQMvkKIXjh8VhXI4rbkH\r\nAvYaB80GyVuqwbvf7oxXb3hB/NCn9db/zwFDz2sUClsCj/37dnzzMznA9Nrrwmkt\r\n/AEJZV/p0PgYsnqL9jPJ2e1w8X9gsXu6VEjP6iN/KLWCBIiPArfU2fU=\r\n-----END RSA PRIVATE KEY-----\r\n");
+		txtDisplay = new Text(composite_2, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		txtDisplay.setFont(SWTResourceManager.getFont("Consolas", 10, SWT.NORMAL));
+		txtDisplay.setText("");
 
 		File out = new File(outDir);
 		if (!out.isDirectory()) {
@@ -958,6 +1088,46 @@ public class Main {
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
+			}
+		}
+	}
+
+	// 从库导出证书和密钥
+	static void reloadKs() {
+		String ksFile = txtKsFile.getText();
+		String ksPwd = txtKsPwd.getText();
+		String keyPwd = txtKeyPwd.getText();
+		try {
+			ks = KsUtils.readP12(ksFile, ksPwd);
+		} catch (Exception e) {
+			try {
+				ks = KsUtils.readJks(ksFile, ksPwd);
+			} catch (Exception e2) {
+				try {
+					ks = KsUtils.readBks(ksFile, ksPwd);
+				} catch (Exception e3) {
+					ks = null;
+				}
+			}
+		}
+		comboAlias.removeAll();
+		txtDisplay.setText("");
+		btnKsShow.setEnabled(false);
+		if (ks != null) {
+			try {
+				boolean flag = false;
+				Enumeration<String> en = ks.aliases();
+				while (en.hasMoreElements()) {
+					flag = true;
+					comboAlias.add(en.nextElement());
+				}
+				if (flag) {
+					comboAlias.select(0);
+					btnKsShow.setEnabled(true);
+				}
+				txtDisplay.setText(KsUtils.print(ks, keyPwd));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

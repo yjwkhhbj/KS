@@ -113,32 +113,32 @@ public class KsUtils {
 		}
 	}
 
-	public static void print(KeyStore ks, String... keyPwd) {
-		System.out.println("*****************KeyStore信息*********************");
+	public static String print(KeyStore ks, String... keyPwd) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("KeyStore信息");
 		try {
-			System.out.println("提供者 : " + ks.getProvider().getName() + "\t类型 : " + ks.getType() + "\t大小 : " + ks.size());
+			sb.append("\n\n提供者 : " + ks.getProvider().getName() + "\n类型 : " + ks.getType() + "\n实体个数 : " + ks.size());
 			Enumeration<String> en = ks.aliases();
 			while (en.hasMoreElements()) {
 				String alias = en.nextElement();
 				Certificate cert = ks.getCertificate(alias);
 				if (cert instanceof X509Certificate) {
-					System.out.println("\n别名为 " + alias + " 的证书信息：");
-					CertUtils.print((X509Certificate) cert);
+					sb.append("\n\n别名为 " + alias + " 的证书信息：\n");
+					sb.append(CertUtils.print((X509Certificate) cert));
 				}
 				if (keyPwd != null) {
 					for (String pwd : keyPwd) {
 						Key key = ks.getKey(alias, pwd.toCharArray());
 						if (key != null) {
-							System.out.println("别名为 " + alias + " 的密钥信息：");
-							KeyUtils.print(key);
+							sb.append("\n\n别名为 " + alias + " 的密钥信息：\n");
+							sb.append(KeyUtils.print(key));
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
-		System.out.println("************************************************");
+		return sb.toString();
 	}
 
 }

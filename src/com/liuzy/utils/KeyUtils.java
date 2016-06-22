@@ -194,8 +194,12 @@ public class KeyUtils {
 		}
 	}
 	
-	public static void print(Key key) {
-		System.out.println("算法：" + key.getAlgorithm() + "\t格式：" + key.getFormat() + "\t长度：" + key.getEncoded().length);
-		System.out.println();
+	public static String print(Key key) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("算法：" + key.getAlgorithm());
+		sb.append("\n格式：" + key.getFormat());
+		sb.append("\n长度：" + key.getEncoded().length);
+		sb.append("\n");
+		return sb.toString();
 	}
 }

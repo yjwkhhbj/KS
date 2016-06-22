@@ -88,13 +88,15 @@ public class CertUtils {
 	 * 
 	 * @param cert
 	 */
-	public static void print(X509Certificate cert) {
+	public static String print(X509Certificate cert) {
+		StringBuilder sb = new StringBuilder();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.out.println("版本号:" + cert.getVersion() + "\t序列号:" + cert.getSerialNumber().toString(16));
-		System.out.println("使用者：" + cert.getSubjectDN());
-		System.out.println("颁发者：" + cert.getIssuerDN());
-		System.out.println("有效期：" + sdf.format(cert.getNotBefore()) + " —— " + sdf.format(cert.getNotAfter()));
-		System.out.println("签名算法：" + cert.getSigAlgName());
-		System.out.println();
+		sb.append("版本号:" + cert.getVersion());
+		sb.append("\n序列号：" + cert.getSerialNumber().toString(16));
+		sb.append("\n使用者：" + cert.getSubjectDN());
+		sb.append("\n颁发者：" + cert.getIssuerDN());
+		sb.append("\n有效期：" + sdf.format(cert.getNotBefore()) + " 至 " + sdf.format(cert.getNotAfter()));
+		sb.append("\n签名算法：" + cert.getSigAlgName());
+		return sb.toString();
 	}
 }
