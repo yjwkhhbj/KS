@@ -19,7 +19,7 @@ import com.liuzy.utils.KsUtils;
 public class CaTest {
 	private static PublicKey publicKey;
 	private static PrivateKey privateKey;
-	
+
 	private static String testDir = "D:/";
 
 	public static void main(String[] args) throws Exception {
@@ -32,17 +32,17 @@ public class CaTest {
 
 		// 测试KeyUtils
 		testKeyUtils();
-		
+
 		// 测试CerReqUtils
 		testCerReqUtils();
-		
+
 		// 测试CACenter
 		testCACenter1();
 		testCACenter2();
-		
+
 		// 测试CertUtils
 		testCertUtils();
-		
+
 		// 测试KsUtils
 		testKsUtils();
 	}
@@ -68,7 +68,7 @@ public class CaTest {
 		CACenter caCenter = new CACenter("CN=ca.com,OU=CA,O=证书签发中心,L=shanghai,ST=shanghai,C=cn");
 		CertUtils.write(caCenter.getCert(), testDir + "ca.crt");
 		KeyUtils.write2RsaKey(caCenter.getPrivateKey(), testDir + "ca.pem");
-		
+
 		// 签发1 根据公钥和使用者信息
 		String subjectDN = "CN=me.com,OU=我公司,O=我公司,L=shanghai,ST=shanghai,C=cn";
 		X509Certificate newcert1 = caCenter.sign(publicKey, subjectDN);
@@ -78,13 +78,13 @@ public class CaTest {
 	public static void testCACenter2() throws Exception {
 		// CA初始化2
 		CACenter caCenter = new CACenter(testDir + "ca.crt", testDir + "ca.pem");
-		
+
 		// 签发2 根据证书请求文件
 		PKCS10CertificationRequest csr = CertReqUtils.read(testDir + "me.csr");
 		X509Certificate newcert2 = caCenter.sign(csr);
 		CertUtils.write(newcert2, testDir + "me_cert2.crt");
 	}
-	
+
 	public static void testCertUtils() throws Exception {
 		// 读证书
 		X509Certificate cert = CertUtils.read(testDir + "me_cert1.crt");

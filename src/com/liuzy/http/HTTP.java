@@ -12,7 +12,9 @@ import java.util.Map;
 
 /**
  * JSON专用HTTP工具
- * <pre>键值POST，发送的是k1=v2&k2=v2类型的BODY。
+ * 
+ * <pre>
+ * 键值POST，发送的是k1=v2&k2=v2类型的BODY。
  * HTTP http = new HTTP();
  * http.put2body("k1", "v1")
  *     .put2body("k2", "v2")
@@ -26,7 +28,9 @@ import java.util.Map;
  * 字符串POST（可直接传JSON，然后添加application/json头）
  * http.put2header("Content-Type", "application/json")
  *     .put2body("{\"k1\":\"v1\",\"k2\":\"v2\"}")
- *     .doPOST("http://127.0.0.1/test");</pre>
+ *     .doPOST("http://127.0.0.1/test");
+ * </pre>
+ * 
  * @author liuzy
  * @since 2015年10月17日
  */
@@ -39,55 +43,68 @@ public class HTTP {
 	private byte[] bodyBytes;
 	protected int timeout = 5000;
 	private String charset = "UTF-8";
+
 	public HTTP put2url(String key, String value) {
 		this.urlMap.put(key, value);
 		return this;
 	}
+
 	public HTTP put2header(String key, String value) {
 		this.headerMap.put(key, value);
 		return this;
 	}
+
 	public HTTP put2body(String key, String value) {
 		this.bodyMap.put(key, value);
 		return this;
 	}
+
 	public HTTP bodyMap2Json() {
 		this.bodyMap2Json = true;
 		return this;
 	}
+
 	public HTTP put2body(String body) {
 		this.bodyMap.clear();
 		this.bodyString = body;
 		this.bodyBytes = null;
 		return this;
 	}
+
 	public HTTP put2body(byte[] body) {
 		this.bodyMap.clear();
 		this.bodyString = null;
 		this.bodyBytes = body;
 		return this;
 	}
+
 	public void setReadGBK() {
 		this.charset = "GBK";
 	}
+
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 	}
+
 	public String doGET(String url) {
 		return request(url, "GET");
 	}
+
 	public String doGET(String url, Map<String, String> urlMap) {
 		if (urlMap != null)
 			this.urlMap = urlMap;
 		return request(url, "GET");
 	}
+
 	public String doPOST(String url) {
 		return request(url, "POST");
 	}
+
 	public String doPOST(String url, Map<String, String> urlMap, Map<String, String> headerMap, Map<String, String> bodyMap, boolean bodyMap2Json) {
 		this.bodyMap2Json = bodyMap2Json;
 		return doPOST(url, urlMap, headerMap, bodyMap);
 	}
+
 	public String doPOST(String url, Map<String, String> urlMap, Map<String, String> headerMap, Map<String, String> bodyMap) {
 		if (urlMap != null)
 			this.urlMap = urlMap;
@@ -100,6 +117,7 @@ public class HTTP {
 		}
 		return request(url, "POST");
 	}
+
 	public String doPOST(String url, Map<String, String> urlMap, Map<String, String> headerMap, String bodyString) {
 		if (urlMap != null)
 			this.urlMap = urlMap;
@@ -112,6 +130,7 @@ public class HTTP {
 		}
 		return request(url, "POST");
 	}
+
 	public String doPOST(String url, Map<String, String> urlMap, Map<String, String> headers, byte[] bodyBytes) {
 		if (urlMap != null)
 			this.urlMap = urlMap;
@@ -124,6 +143,7 @@ public class HTTP {
 		}
 		return request(url, "POST");
 	}
+
 	protected String request(String url, String method) {
 		url = setUrlParams(url);
 		log(method, url);
@@ -153,6 +173,7 @@ public class HTTP {
 		log("RESUT", result);
 		return result;
 	}
+
 	protected String setUrlParams(String url) {
 		if (urlMap.isEmpty())
 			return url;
@@ -163,6 +184,7 @@ public class HTTP {
 			sb.append(key).append("=").append(urlMap.get(key)).append("&");
 		return url + sb.substring(0, sb.length() - 1);
 	}
+
 	protected void setHeader(HttpURLConnection conn) {
 		if (headerMap.isEmpty())
 			return;
@@ -174,6 +196,7 @@ public class HTTP {
 		}
 		log("HEAD", head.substring(0, head.length() - 2));
 	}
+
 	protected void writeBody(HttpURLConnection conn) throws IOException {
 		if (bodyBytes == null && bodyString == null && bodyMap.isEmpty()) {
 			return;
@@ -198,6 +221,7 @@ public class HTTP {
 		outputStream.flush();
 		outputStream.close();
 	}
+
 	private String map2Json(Map<String, String> map) {
 		if (map.isEmpty())
 			return "{}";
@@ -206,6 +230,7 @@ public class HTTP {
 			json.append("\"").append(key).append("\":\"").append(map.get(key)).append("\",");
 		return "{" + json.substring(0, json.length() - 1) + "}";
 	}
+
 	private String map2KV(Map<String, String> map) {
 		if (map.isEmpty())
 			return "";
@@ -214,17 +239,19 @@ public class HTTP {
 			sb.append(key).append("=").append(map.get(key)).append("&");
 		return sb.substring(0, sb.length() - 1);
 	}
+
 	protected String readStream(InputStream inputStream) throws IOException {
 		Reader reader = new InputStreamReader(inputStream, charset);
 		StringBuffer buffer = new StringBuffer();
-        char[] tmp = new char[1024];
-        int len;
-        while((len = reader.read(tmp)) != -1)
-            buffer.append(tmp, 0, len);
-        inputStream.close();
-        reader.close();
-        return buffer.toString();
+		char[] tmp = new char[1024];
+		int len;
+		while ((len = reader.read(tmp)) != -1)
+			buffer.append(tmp, 0, len);
+		inputStream.close();
+		reader.close();
+		return buffer.toString();
 	}
+
 	public HTTP clear() {
 		urlMap.clear();
 		headerMap.clear();
@@ -233,6 +260,7 @@ public class HTTP {
 		bodyBytes = null;
 		return this;
 	}
+
 	public static void log(String prefix, String msg) {
 		System.out.println(String.format("[%5s] %s", prefix, msg));
 	}

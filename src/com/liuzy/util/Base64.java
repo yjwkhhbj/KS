@@ -4,6 +4,7 @@ public class Base64 {
 
 	private static char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray();
 	private static byte[] codes = new byte[256];
+
 	static {
 		for (int i = 0; i < 256; i++)
 			codes[i] = -1;

@@ -21,17 +21,19 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 
 /**
  * 证书请求
+ * 
  * @author liuzy
  * @version 2016-3-21
  */
 public class CertReqUtils {
 	/**
 	 * 生成证书请求
+	 * 
 	 * @param publicKey
 	 * @param privateKey
 	 * @param signatureAlgorithm
 	 * @return
-	 * @throws OperatorCreationException 
+	 * @throws OperatorCreationException
 	 */
 	public static PKCS10CertificationRequest create(PublicKey publicKey, PrivateKey privateKey, String subjectDN, String signatureAlgorithm) throws OperatorCreationException {
 		InputStream in = null;
@@ -54,9 +56,10 @@ public class CertReqUtils {
 
 	/**
 	 * 读证书请求文件
+	 * 
 	 * @param csrFile
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static PKCS10CertificationRequest read(String csrFile) throws IOException {
 		InputStream pemIn = null;
@@ -86,12 +89,16 @@ public class CertReqUtils {
 
 	/**
 	 * 证书请求写入文件
-	 * <pre>-----BEGIN CERTIFICATE REQUEST-----
+	 * 
+	 * <pre>
+	 * -----BEGIN CERTIFICATE REQUEST-----
 	 * xxx
-	 * -----END CERTIFICATE REQUEST-----</pre>
+	 * -----END CERTIFICATE REQUEST-----
+	 * </pre>
+	 * 
 	 * @param csr
 	 * @param path
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void write(PKCS10CertificationRequest req, String path) throws IOException {
 		FileWriter fw = null;
@@ -115,5 +122,5 @@ public class CertReqUtils {
 			}
 		}
 	}
-	
+
 }

@@ -31,7 +31,7 @@ public class KeyUtils {
 	 * 
 	 * @param pemFile
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static KeyPair read(String pemFile) throws IOException {
 		InputStream pemIn = null;
@@ -72,7 +72,7 @@ public class KeyUtils {
 	 * 
 	 * @param pk
 	 * @param path
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void write2RsaKey(PrivateKey pk, String path) throws IOException {
 		FileWriter fw = null;
@@ -101,7 +101,7 @@ public class KeyUtils {
 	 * </pre>
 	 * 
 	 * @param pk
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String toRsaKeyStr(PrivateKey pk) throws IOException {
 		StringWriter sw = null;
@@ -138,7 +138,7 @@ public class KeyUtils {
 	 * 
 	 * @param pk
 	 * @param path
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void write2PKCS8Key(PrivateKey pk, String path) throws IOException {
 		FileWriter fw = null;
@@ -167,7 +167,7 @@ public class KeyUtils {
 	 * </pre>
 	 * 
 	 * @param pk
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String toPKCS8KeyStr(PrivateKey pk) throws IOException {
 		StringWriter sw = null;
@@ -193,7 +193,7 @@ public class KeyUtils {
 			}
 		}
 	}
-	
+
 	public static String print(Key key) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("算法：" + key.getAlgorithm());

@@ -247,9 +247,9 @@ public class Main {
 		comboCAyear.setItems(new String[] { "1年", "5年", "10年", "20年" });
 		comboCAyear.setBounds(106, 130, 73, 25);
 		comboCAyear.select(2);
-		
+
 		comboCAkeylength = new Combo(compositeByHand, SWT.NONE);
-		comboCAkeylength.setItems(new String[] {"1024", "2048", "4096"});
+		comboCAkeylength.setItems(new String[] { "1024", "2048", "4096" });
 		comboCAkeylength.setBounds(106, 93, 73, 25);
 		comboCAkeylength.select(1);
 
@@ -262,7 +262,7 @@ public class Main {
 					if (tabFolder_1.getSelectionIndex() == 0) {
 						String caCertFile = textCaCertFile.getText();
 						String caPemFile = textCaPemFile.getText();
-						if (!isEmpty(caCertFile) && ! isEmpty(caCertFile)) {
+						if (!isEmpty(caCertFile) && !isEmpty(caCertFile)) {
 							CA = new CACenter(caCertFile, caPemFile);
 						}
 					} else {
@@ -287,7 +287,7 @@ public class Main {
 		});
 		button.setBounds(464, 275, 80, 27);
 		button.setText(" 下 一 步 ");
-		
+
 		Button btnNewButton_1 = new Button(compositeStart, SWT.NONE);
 		btnNewButton_1.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -461,7 +461,7 @@ public class Main {
 		Label lblE = new Label(grpCA, SWT.RIGHT);
 		lblE.setText("E");
 		lblE.setBounds(10, 198, 28, 17);
-		
+
 		btnbks_1 = new Button(grpCA, SWT.NONE);
 		btnbks_1.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -676,12 +676,12 @@ public class Main {
 		Label label_11 = new Label(group_1, SWT.RIGHT);
 		label_11.setText("E");
 		label_11.setBounds(19, 210, 28, 17);
-		
+
 		Combo combo_2 = new Combo(group_1, SWT.NONE);
-		combo_2.setItems(new String[] {"1024", "2048", "4096"});
+		combo_2.setItems(new String[] { "1024", "2048", "4096" });
 		combo_2.setBounds(292, 62, 73, 25);
 		combo_2.select(1);
-		
+
 		Button button_6 = new Button(composite_1, SWT.NONE);
 		button_6.setText("打开证书请求文件");
 		button_6.setBounds(92, 281, 136, 27);
@@ -872,7 +872,7 @@ public class Main {
 					String alias = txtClient.getText();
 					String keyPwd = text_15.getText();
 					String ksPwd = text_16.getText();
-					if (!isEmpty(cerFile) && !isEmpty(pemFile) &&  !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
+					if (!isEmpty(cerFile) && !isEmpty(pemFile) && !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
 						X509Certificate cert = CertUtils.read(cerFile);
 						PrivateKey key = KeyUtils.read(pemFile).getPrivate();
 						if (!KsManager.verify(cert.getPublicKey(), key)) {
@@ -905,7 +905,7 @@ public class Main {
 					String alias = txtClient.getText();
 					String keyPwd = text_15.getText();
 					String ksPwd = text_16.getText();
-					if (!isEmpty(cerFile) && !isEmpty(pemFile) &&  !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
+					if (!isEmpty(cerFile) && !isEmpty(pemFile) && !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
 						X509Certificate cert = CertUtils.read(cerFile);
 						PrivateKey key = KeyUtils.read(pemFile).getPrivate();
 						if (!KsManager.verify(cert.getPublicKey(), key)) {
@@ -938,7 +938,7 @@ public class Main {
 					String alias = txtClient.getText();
 					String keyPwd = text_15.getText();
 					String ksPwd = text_16.getText();
-					if (!isEmpty(cerFile) && !isEmpty(pemFile) &&  !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
+					if (!isEmpty(cerFile) && !isEmpty(pemFile) && !isEmpty(alias) && !isEmpty(keyPwd) && !isEmpty(ksPwd)) {
 						X509Certificate cert = CertUtils.read(cerFile);
 						PrivateKey key = KeyUtils.read(pemFile).getPrivate();
 						if (!KsManager.verify(cert.getPublicKey(), key)) {
@@ -965,18 +965,18 @@ public class Main {
 
 		Composite composite_3 = new Composite(tabFolder, SWT.NONE);
 		tbCreateKs.setControl(composite_3);
-		
+
 		Group group_2 = new Group(composite_3, SWT.NONE);
 		group_2.setText(" 选择文件 输入库密码");
 		group_2.setBounds(10, 10, 566, 321);
-		
+
 		txtKsFile = new Text(group_2, SWT.BORDER | SWT.READ_ONLY);
 		txtKsFile.setBounds(194, 33, 154, 23);
-		
+
 		Label label_15 = new Label(group_2, SWT.RIGHT);
 		label_15.setText("库文件");
 		label_15.setBounds(125, 36, 50, 17);
-		
+
 		Button button_3 = new Button(group_2, SWT.NONE);
 		button_3.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -993,11 +993,11 @@ public class Main {
 		});
 		button_3.setText("选择");
 		button_3.setBounds(368, 31, 36, 27);
-		
+
 		Label label_22 = new Label(group_2, SWT.RIGHT);
 		label_22.setText("库密码");
 		label_22.setBounds(125, 92, 50, 17);
-		
+
 		txtKsPwd = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
 		txtKsPwd.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent arg0) {
@@ -1009,7 +1009,7 @@ public class Main {
 		});
 		txtKsPwd.setText("123456");
 		txtKsPwd.setBounds(194, 89, 154, 23);
-		
+
 		Button button_4 = new Button(group_2, SWT.NONE);
 		button_4.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -1044,19 +1044,19 @@ public class Main {
 		});
 		button_4.setText(" 导 出 ");
 		button_4.setBounds(194, 259, 154, 27);
-		
+
 		comboAlias = new Combo(group_2, SWT.READ_ONLY);
 		comboAlias.setItems(new String[] {});
 		comboAlias.setBounds(194, 145, 154, 25);
-		
+
 		Label label_23 = new Label(group_2, SWT.RIGHT);
 		label_23.setText("密钥密码");
 		label_23.setBounds(125, 204, 50, 17);
-		
+
 		Label label_24 = new Label(group_2, SWT.RIGHT);
 		label_24.setText("选择别名");
 		label_24.setBounds(125, 148, 50, 17);
-		
+
 		txtKeyPwd = new Text(group_2, SWT.BORDER | SWT.PASSWORD);
 		txtKeyPwd.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent arg0) {
@@ -1067,12 +1067,12 @@ public class Main {
 		});
 		txtKeyPwd.setText("123456");
 		txtKeyPwd.setBounds(194, 201, 154, 23);
-		
+
 		Label label_21 = new Label(group_2, SWT.RIGHT);
 		label_21.setAlignment(SWT.LEFT);
 		label_21.setText("（密码正确才能导出密钥）");
 		label_21.setBounds(354, 204, 154, 17);
-		
+
 		btnKsShow = new Button(group_2, SWT.NONE);
 		btnKsShow.setEnabled(false);
 		btnKsShow.addSelectionListener(new SelectionAdapter() {
@@ -1201,6 +1201,7 @@ public class Main {
 		box.setMessage(msg);
 		box.open();
 	}
+
 	private static boolean isEmpty(String str) {
 		return str == null || "".equals(str);
 	}

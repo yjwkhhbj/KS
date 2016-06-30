@@ -36,22 +36,24 @@ public class HTTPS extends HTTP {
 			KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 			keyManagerFactory.init(keyStore, keyStorePwd.toCharArray());
 			KeyManager[] km = keyManagerFactory.getKeyManagers();
-			
+
 			// 客户端信任的服务器证书
 			TrustManager[] tm = null;
 			if (trustStore == null) {
 				tm = new TrustManager[] { new X509TrustManager() {
-			        @Override
-			        public X509Certificate[] getAcceptedIssuers() {
-			            return new X509Certificate[] {};
-			        }
-			        @Override
-			        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-			        }
-			        @Override
-			        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-			        }
-			    } };
+					@Override
+					public X509Certificate[] getAcceptedIssuers() {
+						return new X509Certificate[] {};
+					}
+
+					@Override
+					public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+					}
+
+					@Override
+					public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+					}
+				} };
 			} else {
 				TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 				trustManagerFactory.init(trustStore);
@@ -74,7 +76,7 @@ public class HTTPS extends HTTP {
 		});
 	}
 
-	/** 
+	/**
 	 * HTTPS的请方式
 	 */
 	@Override

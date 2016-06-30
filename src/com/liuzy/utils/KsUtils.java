@@ -58,7 +58,8 @@ public class KsUtils {
 		}
 	}
 
-	public static void writeBks(X509Certificate cert, String alias, PrivateKey privateKey, String keyPwd, String ksPwd, String path) throws KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException, IOException {
+	public static void writeBks(X509Certificate cert, String alias, PrivateKey privateKey, String keyPwd, String ksPwd, String path)
+			throws KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException, IOException {
 		KeyStore keyStore = KeyStore.getInstance("BKS", "BC");
 		keyStore.load(null);
 		keyStore.setKeyEntry(alias, privateKey, keyPwd.toCharArray(), new X509Certificate[] { cert });

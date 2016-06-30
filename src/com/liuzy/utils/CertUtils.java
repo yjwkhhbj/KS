@@ -32,7 +32,7 @@ public class CertUtils {
 	 * 
 	 * @param cert
 	 * @param path
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void write(X509Certificate cert, String path) throws IOException {
 		FileWriter fw = null;
@@ -62,8 +62,8 @@ public class CertUtils {
 	 * 
 	 * @param cerFile
 	 * @return
-	 * @throws FileNotFoundException 
-	 * @throws CertificateException 
+	 * @throws FileNotFoundException
+	 * @throws CertificateException
 	 */
 	public static X509Certificate read(String cerFile) throws FileNotFoundException, CertificateException {
 		InputStream crt = null;

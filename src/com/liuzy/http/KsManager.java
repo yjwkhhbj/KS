@@ -24,9 +24,12 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 public class KsManager {
 
 	/**
-	 * @param crtFile client.crt文件
-	 * @param pemFile client.pem文件
-	 * @param keyStorePwd 生成的KeyStore密码
+	 * @param crtFile
+	 *            client.crt文件
+	 * @param pemFile
+	 *            client.pem文件
+	 * @param keyStorePwd
+	 *            生成的KeyStore密码
 	 * @return
 	 */
 	public static KeyStore getKeyStoreByCrtPem(String crtFile, String pemFile, String keyStorePwd) {
@@ -50,15 +53,15 @@ public class KsManager {
 			Certificate[] chain = new Certificate[] { cer };
 
 			// 验证证书、公钥和私钥
-			if(!verify(cer.getPublicKey(), privateKey)) {
+			if (!verify(cer.getPublicKey(), privateKey)) {
 				throw new RuntimeException("客户端公钥和私钥不匹配");
 			}
-			
+
 			// 初始化
 			KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			keyStore.load(null);
 			keyStore.setKeyEntry("client", privateKey, keyStorePwd.toCharArray(), chain);
-			
+
 			return keyStore;
 		} catch (Exception e) {
 			System.out.println("创建服务器信任的证书仓库失败");
@@ -109,7 +112,8 @@ public class KsManager {
 	}
 
 	/**
-	 * @param crtFile server.crt
+	 * @param crtFile
+	 *            server.crt
 	 * @return
 	 */
 	public static KeyStore getTrustStoreByCrt(String crtFile) {
@@ -194,7 +198,7 @@ public class KsManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param jksFile
 	 * @return
@@ -220,7 +224,7 @@ public class KsManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param bksFile
 	 * @return

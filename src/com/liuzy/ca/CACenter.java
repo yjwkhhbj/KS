@@ -54,7 +54,7 @@ public class CACenter extends Subject {
 	/**
 	 * 自己生成CA私钥和CA自签证书
 	 */
-	public CACenter(String subjectDN) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException  {
+	public CACenter(String subjectDN) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
 		super(subjectDN);
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
@@ -101,7 +101,7 @@ public class CACenter extends Subject {
 	 * 
 	 * @param cert
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public boolean isCA(X509Certificate cert) throws IOException {
 		ASN1InputStream in1 = null;
@@ -137,11 +137,13 @@ public class CACenter extends Subject {
 	 * @param SubjectDN
 	 * @return
 	 */
-	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN) throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
+	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN)
+			throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
 		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
 	}
 
-	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm) throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
+	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm)
+			throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
 		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
 	}
 
@@ -153,7 +155,8 @@ public class CACenter extends Subject {
 	 * @param signatureAlgorithm
 	 * @return
 	 */
-	public X509Certificate sign(PublicKey hisPublicKey, X500Name subject, String signatureAlgorithm) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+	public X509Certificate sign(PublicKey hisPublicKey, X500Name subject, String signatureAlgorithm)
+			throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
 		calendar.add(Calendar.YEAR, year);
