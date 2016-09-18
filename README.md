@@ -284,9 +284,7 @@ nginx -s reload
 
 - CA中心
 
-![CA中心](
-
-### http://liuzy88.com/files/ks3.jpg)
+![CA中心](http://liuzy88.com/files/ks3.jpg)
 
 - 证书和密钥导入到库
 
