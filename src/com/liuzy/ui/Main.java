@@ -267,9 +267,11 @@ public class Main {
 						}
 					} else {
 						CACenter.year = Integer.parseInt(comboCAyear.getItem(comboCAyear.getSelectionIndex()).replace("年", ""));
-						CA = new CACenter(txtDN.getText());
-						CA.setSignatureAlgorithm(comboCAsf.getItem(comboCAsf.getSelectionIndex()));
-						CA.setKeyLength(Integer.parseInt(comboCAkeylength.getItem(comboCAkeylength.getSelectionIndex())));
+						int keyLength = Integer.parseInt(comboCAkeylength.getItem(comboCAkeylength.getSelectionIndex()));
+						String signatureAlgorithm = comboCAsf.getItem(comboCAsf.getSelectionIndex());
+						CA = new CACenter(txtDN.getText(), keyLength, signatureAlgorithm);
+//						CA.setSignatureAlgorithm(comboCAsf.getItem(comboCAsf.getSelectionIndex()));
+//						CA.setKeyLength(Integer.parseInt(comboCAkeylength.getItem(comboCAkeylength.getSelectionIndex())));
 					}
 					if (CA != null) {
 						tabStart.setText(" 重新开始 ");

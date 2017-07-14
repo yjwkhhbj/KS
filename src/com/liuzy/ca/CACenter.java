@@ -48,14 +48,18 @@ public class CACenter extends Subject {
 	public static int year = 10;
 
 	public CACenter() throws Exception {
-		this("CN=CA,OU=CA,O=liuzy,L=shanghai,ST=shanghai,C=cn");
+		this("CN=CA,OU=CA,O=liuzy,L=shanghai,ST=shanghai,C=cn", 2048, "SHA1withRSA");
+	}
+
+	public CACenter(String subjectDN) throws Exception {
+		this(subjectDN, 2048, "SHA1withRSA");
 	}
 
 	/**
 	 * 自己生成CA私钥和CA自签证书
 	 */
-	public CACenter(String subjectDN) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
-		super(subjectDN);
+	public CACenter(String subjectDN, int keyLength, String signatureAlgorithm) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+		super(subjectDN, keyLength, signatureAlgorithm);
 		Calendar calendar = Calendar.getInstance();
 		Date notBefore = calendar.getTime();
 		calendar.add(Calendar.YEAR, year);
@@ -139,7 +143,7 @@ public class CACenter extends Subject {
 	 */
 	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN)
 			throws InvalidKeyException, NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException, NoSuchProviderException, SignatureException {
-		return sign(hisPublicKey, new X500Name(subjectDN), signatureAlgorithm);
+		return sign(hisPublicKey, new X500Name(subjectDN), getSignatureAlgorithm());
 	}
 
 	public X509Certificate sign(PublicKey hisPublicKey, String subjectDN, String signatureAlgorithm)

@@ -22,7 +22,7 @@ import com.liuzy.utils.KsUtils;
  * @version 2016-3-22
  */
 public class Subject {
-	protected String subjectDN;
+	protected String subjectDN = "CN=YOU,OU=YOU,O=liuzy,L=shanghai,ST=shanghai,C=cn";
 	protected int keyLength = 2048;
 	protected PublicKey publicKey;
 	protected PrivateKey privateKey;
@@ -35,6 +35,17 @@ public class Subject {
 
 	public Subject(String subjectDN) throws NoSuchAlgorithmException {
 		this.subjectDN = subjectDN;
+		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+		kpg.initialize(keyLength);
+		KeyPair kp = kpg.generateKeyPair();
+		publicKey = kp.getPublic();
+		privateKey = kp.getPrivate();
+	}
+
+	public Subject(String subjectDN, int keyLength, String signatureAlgorithm) throws NoSuchAlgorithmException {
+		this.subjectDN = subjectDN;
+		this.keyLength = keyLength;
+		this.signatureAlgorithm = signatureAlgorithm;
 		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 		kpg.initialize(keyLength);
 		KeyPair kp = kpg.generateKeyPair();
