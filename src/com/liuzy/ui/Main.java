@@ -114,7 +114,7 @@ public class Main {
 
 		shlJavaLiuzy = new Shell(display, SWT.CLOSE | SWT.MIN);
 		shlJavaLiuzy.setModified(true);
-		shlJavaLiuzy.setText("JAVA证书签发和证书库工具 —— Liuzy制作 QQ416657468");
+		shlJavaLiuzy.setText("JAVA证书签发和证书库工具20170714 —— Liuzy制作 QQ416657468");
 		shlJavaLiuzy.setSize(600, 400);
 		shlJavaLiuzy.setLocation(display.getClientArea().width / 2 - shlJavaLiuzy.getShell().getSize().x / 2, display.getClientArea().height / 2 - shlJavaLiuzy.getSize().y / 2);
 		shlJavaLiuzy.setLayout(new FillLayout(SWT.HORIZONTAL));
